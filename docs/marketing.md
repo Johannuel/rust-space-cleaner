@@ -7,12 +7,13 @@ por defecto"**.
 
 ## Plan de publicación (día 1)
 
-1. **Reddit r/rust** (mañana temprano, 8-10am CET) — el post de más valor.
-2. **X** 1-2h después del de Reddit (misma mañana).
-3. **Bluesky** el mismo día por la tarde.
-4. **r/commandline** 2-3 días después (reposteo con el mismo texto, no spam).
-5. Contestar TODOS los comments las primeras 48h (es lo que más upvotes da).
-6. Si r/rust ignora → re-postear en r/rust con ángulo distinto tras 2 semanas.
+1. **Reddit r/opencode** (mañana temprano) — el sub que más visitas dio, ángulo "built with opencode". Post listo abajo.
+2. **Reddit r/rust** (1-2h después) — post de más valor técnico, con gancho opencode.
+3. **X** 1-2h después (misma mañana).
+4. **Bluesky** el mismo día por la tarde.
+5. **r/commandline** 2-3 días después (reposteo con el mismo texto, no spam).
+6. Contestar TODOS los comments las primeras 48h (es lo que más upvotes da).
+7. Si r/rust ignora → re-postear en r/rust con ángulo distinto tras 2 semanas.
 
 ## URL útiles
 
@@ -57,8 +58,32 @@ weight, and only deletes folders on an explicit whitelist (never $HOME).
 
 Repo: https://github.com/Johannuel/rust-space-cleaner
 
-This is my first time writing Rust. Feedback on the safety model and the
+This is my first time writing Rust — I built it with opencode (an open-source
+AI coding agent) as my pair programmer. Feedback on the safety model and the
 registry design very welcome 🙏
+```
+
+---
+
+## Reddit — r/opencode (PRIORIDAD 1, día 1 mañana — el sub que más visitas da)
+
+```markdown
+[P] I built a Rust TUI cache cleaner with opencode — and shipped it to crates.io in a week
+
+I built `rust-space-cleaner` (a cache hunter TUI in Rust + ratatui) mostly
+with opencode as my pair programmer. It scans 24 types of disk junk (cargo
+targets, Steam shaders, npm, docker leftovers...), shows sizes sorted by
+weight, and only deletes whitelisted cache folders after your confirm —
+dry-run by default.
+
+What working with opencode taught me:
+- The registry design (src/registry.rs) is 24 rows + one test each — the
+  agent kept pushing me toward the declarative version, and it paid off
+- Safety was reviewable: `is_safe_to_clean` + 41 tests for the dangerous part
+- CI + release binaries for Win/Linux/macOS were generated, not hand-written
+
+Repo: https://github.com/Johannuel/rust-space-cleaner
+crates.io: https://crates.io/crates/rust-space-cleaner
 ```
 
 ---
