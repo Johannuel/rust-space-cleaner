@@ -21,7 +21,7 @@ por defecto"**.
 - crates.io: https://crates.io/crates/rust-space-cleaner
 - Release: https://github.com/Johannuel/rust-space-cleaner/releases/tag/v0.1.0
 - Social card: `assets/social-card.png`
-- Demo (cuando exista): `assets/demo.gif`
+- Screenshot del TUI: `assets/screenshot.png`
 
 ## Checklist de claims (qué es REAL hoy en v0.1.0)
 | Claim | Real en v0.1.0? |
@@ -191,10 +191,10 @@ Sección sugerida: `Applications → System`.
 3. [x] Release v0.1.0 (binaries en CI)
 4. [x] Publicado en crates.io (`cargo install` funciona)
 5. [ ] PKGBUILD subido a AUR (falta acceso SSH)
-6. [ ] Grabar demo (assets/demo.gif) y ponerlo en README/comment 1 de cada post
+6. [ ] Subir `assets/screenshot.png` como imagen en los posts
 7. [ ] **r/rust** (día 1, mañana) + **X** (misma mañana) + **Bluesky** (tarde)
 8. [ ] **r/commandline** (2-3 días después)
 9. [ ] Star-círculo: pedir a un amigo → con 2-3, solicitar reacciones
 10. [ ] Opcional: Dev.to, Lobsters, Show HN (solo si sobra tiempo)
 
-*El demo se graba desde una terminal real con asciinema → agg → demo.gif.*
+*La captura se toma del TUI real con `grim` desde una terminal Wayland.*
