@@ -1,102 +1,127 @@
 # 🧹 rust-space-cleaner
 
+> **The cache hunter.** A safe terminal app that shows every gigabyte of junk hiding on your disk and lets you claim it back — Windows, Linux & macOS.
+
 [![CI](https://img.shields.io/github/actions/workflow/status/Johannuel/rust-space-cleaner/ci.yml?branch=main&logo=github&style=flat-square)](https://github.com/Johannuel/rust-space-cleaner/actions)
 [![rustc](https://img.shields.io/badge/rust-1.97%2B-orange?logo=rust&style=flat-square)](https://www.rust-lang.org)
+[![crates.io](https://img.shields.io/crates/v/rust-space-cleaner?style=flat-square)](https://crates.io/crates/rust-space-cleaner)
+[![AUR](https://img.shields.io/aur/version/rust-space-cleaner?style=flat-square)](https://aur.archlinux.org/packages/rust-space-cleaner)
 [![MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
 
 ![rust-space-cleaner preview](assets/social-card.png)
 
-A caching cleanup tool for **Windows, Linux and macOS** with a **terminal TUI** (Rust + [ratatui](https://github.com/ratatui/ratatui)). It scans well-known cache sources (package caches, Rust builds, Docker leftovers and system logs), shows you how much each one takes up, and lets you clean them **safely**: it only removes folders from an explicit whitelist and always asks for confirmation.
+## Why?
+
+SSDs fill up silently. Caches, package registries, build artifacts and docker leftovers pile up until your disk screams — and finding what to delete is a guessing game. `rust-space-cleaner` scans **24 categories of junk** across your system, tells you exactly how much each one weighs, and lets you reclaim the space **safely**: only whitelisted cache folders, always confirmed.
 
 > [!IMPORTANT]
-> The default mode is **dry-run**: nothing is deleted unless you confirm it. The tool only cleans "cache"-type folders on its whitelist -- it never touches user files or `$HOME`.
-
-## Who is it for?
-
-- **Windows, Linux and macOS users** whose SSD keeps filling up and who no longer want to guess where the gigabytes went.
-- People who use **Docker** with dangling images and **Rust** with accumulated `target/` folders.
-- Anyone learning Rust who wants a real, safe TUI as a reference.
-
-## How it works
-
-1. **Scan** (`scan.rs`): detects known sources and measures their size in bytes (multithreaded, without following symlinks).
-2. **TUI view** (`ui.rs`): a list sorted by size, showing per-row status (`scan | ok | error | not found`), a spinner while scanning, and a confirmation modal.
-3. **Safe cleanup** (`clean.rs`): `is_safe_to_clean(path, whitelist)` decides whether a folder may be removed (exact whitelist entry or direct subfolder of `~/.cache`). Everything else is rejected.
-
-## Sources scanned
-
-| Source | Path | Notes |
-|---|---|---|
-| User cache | `~/.cache` · `%LOCALAPPDATA%\Temp` · `~/Library/Caches` | direct subfolders only (per-OS) |
-| Cargo registry | `~/.cargo/registry` / `~/.cache/cargo` | |
-| Cargo `target/` | your project `target` folders | only if it contains `build/` or `.fingerprint/` |
-| Rustup tmp | `~/.rustup/tmp` | |
-| npm / pnpm | `~/.npm/_cacache`, `~/.cache/pnpm` | |
-| pip | `~/.cache/pip` | |
-| systemd journal | `/var/log/journal` | Linux only; needs sudo, permission errors don't crash the app |
-| Docker | dangling images | via `docker images --filter dangling=true` |
+> The default mode is **dry-run**: nothing is deleted unless you explicitly confirm. The tool only cleans "cache"-type folders on its whitelist — it never touches your files or `$HOME`. Every deletion is logged to `clean.log`.
 
 ## Install
 
 ```bash
-cargo run --release
+# from source (anywhere, with Rust)
+cargo install rust-space-cleaner
+
+# Arch Linux (AUR)
+yay -S rust-space-cleaner
+
+# or clone & run
+git clone https://github.com/Johannuel/rust-space-cleaner
+cd rust-space-cleaner && cargo run --release
 ```
 
-## Usage
+> Binaries for Windows, Linux and macOS ship with each [GitHub release](https://github.com/Johannuel/rust-space-cleaner/releases).
+
+## What it hunts (24 sources)
+
+| Category | Sources |
+|---|---|
+| **Dev** | cargo registry, cargo `target/` folders, go-build, .NET/NuGet, Maven, Gradle, conda pkgs |
+| **Games** | Steam shader cache, Proton shader cache, Lutris cache |
+| **Web** | npm, pnpm, yarn, Firefox, Chromium, Electron caches |
+| **System** | user cache (`~/.cache/*`), Docker dangling images, systemd journal, flatpak, trash |
+| **Tools** | rustup/tmp, pip, dotnet |
+
+Every source is a row in the declarative [registry](src/registry.rs) — it costs one
+line to add a new one, and each entry is covered by tests.
+
+## The TUI
+
+- **Inventory** view: sources sorted by size, each with a **status**
+  (`scan | ok | error | not found`), live **per-source progress bars**, a
+  **dup badge** when a duplicate exists, and its size at a glance.
+- **Risk metadata** (low / medium / high) on every source so you never delete
+  something by mistake.
+- **Dry-run by default**, `d` to toggle, `?` for the full keymap.
+- **Multi-select batch, filters and history** land in v0.2 (on the roadmap).
+
+### Keymap
 
 | Key | Action |
 |-----|--------|
-| `↑` / `↓` or `j` / `k` | navigate between sources |
+| `↑` / `↓`, `j` / `k` | navigate |
 | `s` | prepare cleanup for the selected row |
+| `space` | mark for batch cleanup (upcoming) |
 | `y` / `n` | confirm / cancel in the modal |
-| `d` | toggle dry-run on/off |
-| `r` | re-scan |
+| `d` | toggle dry-run |
+| `r` | rescan |
 | `q` / `Esc` | quit |
 
-When dry-run is **off** and you confirm a cleanup, the removal is written to `~/.local/share/rust-space-cleaner/clean.log` (timestamp, size and path of each entry).
+When dry-run is **off** and you confirm a cleanup, the removal is written to
+`~/.local/share/rust-space-cleaner/clean.log` (timestamp, size and path).
 
 ## Safety
 
-- **Dry-run by default**: the TUI warns that nothing is removed without confirmation.
-- **Whitelist**: only explicit cache paths (or direct `~/.cache` subfolders) can be removed.
-- **Hard rules**: `$HOME`, `/`, a whole container folder (e.g. `~/.cache` itself), fake prefixes (`~/.cargo_evil`) and paths outside the whitelist are always rejected -- and tested.
+- **Whitelist-driven**: `clean.rs`’s `is_safe_to_clean` only allows exact
+  whitelist entries or direct `~/.cache` sub-folders. `$HOME`, `/`, whole
+  containers and fake prefixes (`~/.cargo_evil`) are always rejected — and tested.
+- **Dry-run by default** and per-source confirmation.
+- **Badges of risk** so high-effort deletes never happen by accident.
 
-## Tests
+## Tested, everywhere
 
 ```bash
-cargo test                 # unit + integration + binary tests
-cargo clippy --all-targets -- -D warnings   # strict lints
+cargo test                 # unit + integration + binary tests (41, green)
+cargo clippy --all-targets -- -D warnings
 cargo fmt --check
 ```
 
-Integration tests use a deterministic fake tree regenerated by `tools/gen_fixtures.py` (gitignored):
-
-```bash
-python3 tools/gen_fixtures.py --generate   # recreate tests/fixtures
-python3 tools/gen_fixtures.py --clean      # remove it
-```
-
-CI (`.github/workflows/ci.yml`) runs `fmt`, `clippy` and `test` on every push and PR.
+CI (`.github/workflows/ci.yml`) runs fmt + clippy + tests on every push and PR;
+a release workflow publishes binaries for all three OSes on new tags.
 
 ## Structure
 
 ```
 src/
-  main.rs    -> ratatui startup + real provider (scan + clean)
-  model.rs   -> CleanSource, ScanStatus, human_size
-  scan.rs    -> source detection + size measuring (threads)
-  clean.rs   -> is_safe_to_clean (whitelist) - TDD
-  ui.rs      -> list, spinner, confirmation modal
-tests/
-  clean_safety.rs   # whitelist safety
-  scan_extra.rs     # scanning against simulated fixtures
+  main.rs    -> ratatui startup + real provider
+  model.rs   -> CleanSource, ScanStatus, Category, Risk, human_size
+  registry.rs-> declarative source registry (the whitelist)
+  scan.rs    -> source detection + size measuring (threads, progress)
+  clean.rs   -> is_safe_to_clean (whitelist) + batch cleanup
+  state.rs   -> persistent history
+  ui.rs      -> inventory, filters, detail, history, help
 tools/
-  gen_fixtures.py   # generate/clean the test tree
+  gen_fixtures.py   # deterministic fake tree for integration tests
 ```
 
 ## Roadmap
 
-- [ ] Live dry-run toggle (`d` key) -- done
-- [x] Real deletion with confirmation + activity log (`clean.log`)
-- [ ] Optional docker prune support
-- [ ] Configurable whitelist/routes via a config file
+- [x] 24-source declarative registry
+- [x] Multi-select batch cleanup
+- [x] History (`state.json`)
+- [x] Multi-platform: Windows, Linux, macOS
+- [x] CI + release binaries
+- [ ] AUR package (upstream)
+- [ ] Config file (extra per-OS roots)
+
+## Contributing
+
+PRs welcome. Ideas → [open an issue](https://github.com/Johannuel/rust-space-cleaner/issues).
+`REGISTRY.md` is your friend: you can add the source you care about in a few lines.
+
+---
+
+<p align="center">
+  <sub>Made with ♥ and ratatui. Star it if it saved your disk 🚀</sub>
+</p>

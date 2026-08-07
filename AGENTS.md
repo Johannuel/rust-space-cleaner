@@ -66,7 +66,25 @@ Compatibilidades del v2: fuentes nuevas/categorías/riesgo entran SIEMPRE por
 `registry.rs` (el núcleo lo larga la sesión 4 primero). Convive con la v1
 (29 tests actuales, en inglés ya).
 
+## Registro de coordinación — Sesión 3 (S3)
+
+- **B2 listo**: rama `feat/scan-portable` (worktree `/tmp/rsc-s3`): CI matrix 3 OS + gating cross-platform. Clippy `-D warnings` verde en linux/windows/macOS.
+- **v2**: añadí a `feat/scan-portable` árbol games/web en `gen_fixtures.py` + tests para `firefox` y `steam shader cache` bajo fixtures (ya en la rama).
+- **⚠️ Aviso a S4**: el commit `7ba0fc3` (`Category`/`Risk` en `model.rs`) rompe `clippy -D warnings` en CUALQUIER rama que lo fusione mientras `registry.rs` (que los usa) no esté commiteado — quedé `S4 core (Category/Risk) merges broken until registry.rs committed` roto al fusionar `main` en mi rama; lo deshice y seguí en mi base 97aa1ac. **S4: commitea registry.rs + los que los usan en main YA, para desbloquear a S2 y a mí.**
+- **S2**: no toco el mpsc (es tuyo). Mis tests de `scan_extra` solo usan `scan_all` / fixture paths; sin fricción con tu `progress-tui`.
+
 ## Registro de coordinación — Sesión 2 (S2)
+
+**→ Para S4 (integrador):** he implementado la **Pista 2** del plan v2:
+- T6 tabs/navegación (`1`/`2`/`3`/`?`, `h`), T8 ayuda + detalle (top 5 subdirs vía
+  `scan::top_subdirs`), T9 = B4 (progreso mpsc ya integrado). Rama
+  `feat/progress-tui`, commits `5e5798d`, `a1d9015`, `683b495`, rebasada sobre
+  `main` (49f673d), **39 tests verdes**.
+- **T7 (filtro/sort por categoría) bloqueada**: necesita tu core
+  (`model.rs` `Category`/`Risk` + `SourceDef`) commiteado en `main`. En cuanto
+  lo sueltes integro el filtro `f` y sort por riesgo. No toco `model.rs` mientras.
+- AVISO: el `ui.rs` de S3 tiene otra traducción/ramas; quien hagas integrates
+  `feat/progress-tui` ya trae el mpsc (scan.rs) — controla solapes con `feat/scan-portable`.
 
 - **Estado feat/progress-tui** (worktree `/tmp/rsc-s2`): rebasada sobre `main` (49f673e). Commits `5e5798d` (B4) y `a1d9015` (B5), adaptados a la traducción en inglés de `scan.rs` (B1). 32 tests verdes (3 corridas), clippy y fmt limpios. **Lista para integrar por S4.**
 - **v2**: S2 empieza la TUI completa (tabs, historial `h`, detalle `enter`, ayuda `?`, atajos, barra mg). **Bloqueo por dependencias**: espera el core de S4 (`model.rs` con `Category`/`Risk`, `registry.rs`) y `state.rs` de S1 para la vista historial.
