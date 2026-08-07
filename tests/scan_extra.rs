@@ -1,8 +1,13 @@
+#![allow(dead_code)]
+
 #[path = "../src/scan.rs"]
 mod scan;
 
 #[path = "../src/model.rs"]
 mod model;
+
+#[path = "../src/registry.rs"]
+mod registry;
 
 use std::path::Path;
 

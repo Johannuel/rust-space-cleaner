@@ -68,7 +68,7 @@ Compatibilidades del v2: fuentes nuevas/categorías/riesgo entran SIEMPRE por
 
 ## Registro de coordinación — Sesión 2 (S2)
 
-- **Estado feat/progress-tui** (worktree `/tmp/rsc-s2`): B4 + B5 listos y en verde (35 tests: 12 bin + 10 clean_safety + 13 scan_extra). Commits `5cc2d99` (B4) y `0bf8dc2` (B5). **Listo para integrar por S4** (no hagas push a main).
+- **Estado feat/progress-tui** (worktree `/tmp/rsc-s2`): rebasada sobre `main` (49f673e). Commits `5e5798d` (B4) y `a1d9015` (B5), adaptados a la traducción en inglés de `scan.rs` (B1). 32 tests verdes (3 corridas), clippy y fmt limpios. **Lista para integrar por S4.**
 - **v2**: S2 empieza la TUI completa (tabs, historial `h`, detalle `enter`, ayuda `?`, atajos, barra mg). **Bloqueo por dependencias**: espera el core de S4 (`model.rs` con `Category`/`Risk`, `registry.rs`) y `state.rs` de S1 para la vista historial.
 - **Punto caliente para las OL: el mpsc de progreso lo cubre S2** (spec v2 §5). Las ramas `feat/scan-portable` (S3) y `feat/bench` (S4) rebasan mi base; quien integre puede necesitar merge manual en `src/ui.rs` (badge DUP + Gauge).
 

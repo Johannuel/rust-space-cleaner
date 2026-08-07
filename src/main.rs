@@ -1,5 +1,6 @@
 mod clean;
 mod model;
+mod registry;
 mod scan;
 mod ui;
 
@@ -36,15 +37,14 @@ impl SourceProvider for RealProvider {
     }
 
     fn clean(&mut self, source: &CleanSource) -> Result<(), String> {
-        let whitelist: Vec<PathBuf> = [
-            self.home.join(".cache"),
-            self.home.join(".cargo"),
-            self.home.join(".rustup/tmp"),
-            self.home.join(".npm/_cacache"),
-            self.home.join(".cache/pip"),
-        ]
-        .into_iter()
-        .collect();
+        let whitelist: Vec<PathBuf> = {
+            let mut paths: Vec<PathBuf> = registry::registry()
+                .iter()
+                .flat_map(|def| registry::expand_paths(def, &self.home))
+                .collect();
+            paths.push(self.home.join(".cache"));
+            paths
+        };
         let whitelist_refs: Vec<&std::path::Path> = whitelist.iter().map(|p| p.as_path()).collect();
 
         if !clean::is_safe_to_clean(&source.path, &whitelist_refs) {

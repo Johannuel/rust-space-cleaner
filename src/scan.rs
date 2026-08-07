@@ -5,6 +5,7 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 
 use crate::model::{CleanSource, ScanStatus};
+use crate::registry::{SourceDef, expand_paths, registry};
 
 pub fn home_dir() -> PathBuf {
     #[cfg(target_os = "windows")]
@@ -18,33 +19,26 @@ pub fn home_dir() -> PathBuf {
 
 pub fn candidate_sources(home: &Path) -> Vec<CleanSource> {
     let mut sources = Vec::new();
-    user_cache(home, &mut sources);
-    cargo_global(home, &mut sources);
-    project_targets(home, &mut sources);
-    rustup_tmp(home, &mut sources);
-    npm_pnpm(home, &mut sources);
-    pip_cache(home, &mut sources);
-    journal(&mut sources);
-    docker_dangling_source(&mut sources);
+    for def in registry() {
+        match def.id {
+            "user_cache" => user_cache(home, def, &mut sources),
+            "cargo_global" => cargo_global(home, def, &mut sources),
+            "cargo_target" => project_targets(home, def, &mut sources),
+            "journal" => journal(def, &mut sources),
+            "docker" => docker_dangling_source(def, &mut sources),
+            _ => {
+                for path in expand_paths(def, home) {
+                    sources.push(
+                        CleanSource::new(def.id, def.name, path).with_meta(def.category, def.risk),
+                    );
+                }
+            }
+        }
+    }
     sources
 }
 
-fn push_subdir_source(
-    sources: &mut Vec<CleanSource>,
-    id: &'static str,
-    prefix: &str,
-    path: PathBuf,
-) {
-    if let Some(name) = path.file_name() {
-        sources.push(CleanSource::new(
-            id,
-            &format!("{prefix}{}", name.to_string_lossy()),
-            path,
-        ));
-    }
-}
-
-fn user_cache(home: &Path, sources: &mut Vec<CleanSource>) {
+fn user_cache(home: &Path, def: &SourceDef, sources: &mut Vec<CleanSource>) {
     #[cfg(target_os = "windows")]
     let base = {
         let app = env::var_os("LOCALAPPDATA").map(PathBuf::from);
@@ -59,21 +53,34 @@ fn user_cache(home: &Path, sources: &mut Vec<CleanSource>) {
 
     if let Some(base) = base {
         for path in direct_subdirs(&base) {
-            push_subdir_source(sources, "user_cache", "user_cache/", path);
+            push_subdir_source(sources, def, path);
         }
     }
 }
 
-fn cargo_global(home: &Path, sources: &mut Vec<CleanSource>) {
+fn push_subdir_source(sources: &mut Vec<CleanSource>, def: &SourceDef, path: PathBuf) {
+    if let Some(name) = path.file_name() {
+        sources.push(
+            CleanSource::new(
+                def.id,
+                &format!("{}/{}", def.name, name.to_string_lossy()),
+                path,
+            )
+            .with_meta(def.category, def.risk),
+        );
+    }
+}
+
+fn cargo_global(home: &Path, def: &SourceDef, sources: &mut Vec<CleanSource>) {
     #[cfg(target_os = "linux")]
     let path = home.join(".cache/cargo");
     #[cfg(not(target_os = "linux"))]
     let path = home.join(".cargo/registry");
 
-    sources.push(CleanSource::new("cargo_target", "cargo (global)", path));
+    sources.push(CleanSource::new(def.id, def.name, path).with_meta(def.category, def.risk));
 }
 
-fn project_targets(home: &Path, sources: &mut Vec<CleanSource>) {
+fn project_targets(home: &Path, def: &SourceDef, sources: &mut Vec<CleanSource>) {
     let roots = [home.join("Projects"), home.join("code"), home.join("dev")];
     for root in roots {
         for target in find_real_targets(&root) {
@@ -82,86 +89,27 @@ fn project_targets(home: &Path, sources: &mut Vec<CleanSource>) {
                 .and_then(Path::file_name)
                 .map(|n| n.to_string_lossy().into_owned())
                 .unwrap_or_else(|| "target".to_string());
-            sources.push(CleanSource::new(
-                "cargo_target",
-                &format!("target ({name})"),
-                target,
-            ));
+            sources.push(
+                CleanSource::new(def.id, &format!("target ({name})"), target)
+                    .with_meta(def.category, def.risk),
+            );
         }
     }
 }
 
-fn rustup_tmp(home: &Path, sources: &mut Vec<CleanSource>) {
-    sources.push(CleanSource::new(
-        "rustup_tmp",
-        "rustup/tmp",
-        home.join(".rustup/tmp"),
-    ));
-}
-
-fn npm_pnpm(home: &Path, sources: &mut Vec<CleanSource>) {
-    #[cfg(target_os = "windows")]
-    let base = env::var_os("LOCALAPPDATA").map(PathBuf::from);
-    #[cfg(not(target_os = "windows"))]
-    let base = Some(home.to_path_buf());
-
-    let Some(base) = base else { return };
-    #[cfg(target_os = "windows")]
-    {
-        sources.push(CleanSource::new(
-            "npm_cache",
-            "npm-cache",
-            base.join("npm-cache"),
-        ));
-        sources.push(CleanSource::new(
-            "npm_cache",
-            "pnpm-cache",
-            base.join("pnpm-cache"),
-        ));
-    }
-    #[cfg(not(target_os = "windows"))]
-    {
-        sources.push(CleanSource::new(
-            "npm_cache",
-            "npm/_cacache",
-            base.join(".npm/_cacache"),
-        ));
-        sources.push(CleanSource::new(
-            "npm_cache",
-            "pnpm",
-            base.join(".cache/pnpm"),
-        ));
-    }
-}
-
-fn pip_cache(home: &Path, sources: &mut Vec<CleanSource>) {
-    #[cfg(target_os = "windows")]
-    let base = env::var_os("LOCALAPPDATA")
-        .map(PathBuf::from)
-        .map(|app| app.join("pip/cache"));
-    #[cfg(not(target_os = "windows"))]
-    let base = Some(home.join(".cache/pip"));
-
-    if let Some(base) = base {
-        sources.push(CleanSource::new("pip_cache", "pip", base));
-    }
-}
-
-fn journal(sources: &mut Vec<CleanSource>) {
+fn journal(def: &SourceDef, sources: &mut Vec<CleanSource>) {
     #[cfg(target_os = "linux")]
-    sources.push(CleanSource::new(
-        "journal",
-        "journal (systemd)",
-        PathBuf::from("/var/log/journal"),
-    ));
+    sources.push(
+        CleanSource::new(def.id, def.name, PathBuf::from("/var/log/journal"))
+            .with_meta(def.category, def.risk),
+    );
 }
 
-fn docker_dangling_source(sources: &mut Vec<CleanSource>) {
-    sources.push(CleanSource::new(
-        "docker",
-        "docker dangling",
-        PathBuf::from("docker-cli"),
-    ));
+fn docker_dangling_source(def: &SourceDef, sources: &mut Vec<CleanSource>) {
+    sources.push(
+        CleanSource::new(def.id, def.name, PathBuf::from("docker-cli"))
+            .with_meta(def.category, def.risk),
+    );
 }
 
 pub fn scan_all(sources: Vec<CleanSource>) -> Vec<CleanSource> {

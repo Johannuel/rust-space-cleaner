@@ -21,6 +21,7 @@ pub enum Category {
 }
 
 impl Category {
+    #[allow(dead_code)] // consumed by the TUI (filters/colors) in v2
     pub fn label(self) -> &'static str {
         match self {
             Self::Dev => "dev",
@@ -41,6 +42,7 @@ pub enum Risk {
 }
 
 impl Risk {
+    #[allow(dead_code)] // consumed by the TUI (risk badge) in v2
     pub fn label(self) -> &'static str {
         match self {
             Self::Low => "low",
@@ -70,6 +72,8 @@ pub struct CleanSource {
     pub size_bytes: u64,
     pub status: ScanStatus,
     pub detail: Option<String>,
+    pub category: Category,
+    pub risk: Risk,
 }
 
 impl CleanSource {
@@ -81,7 +85,16 @@ impl CleanSource {
             size_bytes: 0,
             status: ScanStatus::Scanning,
             detail: None,
+            category: Category::System,
+            risk: Risk::Medium,
         }
+    }
+
+    #[allow(dead_code)] // wired by scan.rs when building sources from defs
+    pub fn with_meta(mut self, category: Category, risk: Risk) -> Self {
+        self.category = category;
+        self.risk = risk;
+        self
     }
 }
 
@@ -112,7 +125,9 @@ impl std::fmt::Display for CleanSource {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "{:<12} {:>10}  {}",
+            "{}:{:<5} {:<12} {:>10}  {}",
+            self.category.label(),
+            self.risk.label(),
             self.status,
             human_size(self.size_bytes),
             self.name
@@ -122,7 +137,7 @@ impl std::fmt::Display for CleanSource {
 
 #[cfg(test)]
 mod tests {
-    use super::{human_size, Category, Risk};
+    use super::{Category, Risk, human_size};
 
     #[test]
     fn category_labels() {
