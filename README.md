@@ -4,6 +4,7 @@
 
 [![CI](https://img.shields.io/github/actions/workflow/status/Johannuel/rust-space-cleaner/ci.yml?branch=main&logo=github&style=flat-square)](https://github.com/Johannuel/rust-space-cleaner/actions)
 [![release](https://img.shields.io/github/v/release/Johannuel/rust-space-cleaner?style=flat-square)](https://github.com/Johannuel/rust-space-cleaner/releases)
+[![crates.io](https://img.shields.io/crates/v/rust-space-cleaner?style=flat-square)](https://crates.io/crates/rust-space-cleaner)
 [![rustc](https://img.shields.io/badge/rust-1.97%2B-orange?logo=rust&style=flat-square)](https://www.rust-lang.org)
 [![MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
 
@@ -19,6 +20,9 @@ SSDs fill up silently. Caches, package registries, build artifacts and docker le
 ## Install
 
 ```bash
+# anywhere, with Rust
+cargo install rust-space-cleaner
+
 # or clone & run
 git clone https://github.com/Johannuel/rust-space-cleaner
 cd rust-space-cleaner && cargo run --release
@@ -100,7 +104,7 @@ tools/
 - [x] CI + release binaries
 - [ ] Progress bars, dup badges, tabs and detail views
 - [ ] Batch cleanup + persistent history
-- [ ] crates.io / AUR packages
+- [ ] AUR package
 - [ ] Config file (extra per-OS roots)
 
 ## Contributing
