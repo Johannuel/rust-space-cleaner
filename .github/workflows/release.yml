@@ -33,6 +33,12 @@ jobs:
           targets: ${{ matrix.target }}
           components: rustfmt, clippy
 
+      - name: Install cross-linker for RISC targets
+        if: startsWith(matrix.target, 'aarch64') && contains(matrix.target, 'linux')
+        uses: taiki-e/setup-cross-toolchain-action@v1
+        with:
+          target: ${{ matrix.target }}
+
       - name: Build release
         run: cargo build --release --target ${{ matrix.target }}
 
