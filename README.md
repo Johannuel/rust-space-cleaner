@@ -5,6 +5,7 @@
 [![CI](https://img.shields.io/github/actions/workflow/status/Johannuel/rust-space-cleaner/ci.yml?branch=main&logo=github&style=flat-square)](https://github.com/Johannuel/rust-space-cleaner/actions)
 [![release](https://img.shields.io/github/v/release/Johannuel/rust-space-cleaner?style=flat-square)](https://github.com/Johannuel/rust-space-cleaner/releases)
 [![crates.io](https://img.shields.io/crates/v/rust-space-cleaner?style=flat-square)](https://crates.io/crates/rust-space-cleaner)
+[![downloads](https://img.shields.io/crates/d/rust-space-cleaner?style=flat-square)](https://crates.io/crates/rust-space-cleaner)
 [![rustc](https://img.shields.io/badge/rust-1.97%2B-orange?logo=rust&style=flat-square)](https://www.rust-lang.org)
 [![MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
 
@@ -29,6 +30,7 @@ cd rust-space-cleaner && cargo run --release
 ```
 
 > Binaries for Windows, Linux and macOS ship with each [GitHub release](https://github.com/Johannuel/rust-space-cleaner/releases).
+> Want to try it without installing? Just `cargo install rust-space-cleaner` in a terminal and run `rust-space-cleaner`.
 
 ## What it hunts (24 sources)
 

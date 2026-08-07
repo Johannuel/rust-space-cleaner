@@ -12,7 +12,8 @@
 muestra cuánto pesa cada una y permite limpiarlas SOLO si están en la whitelist,
 con dry-run por defecto y confirmación. Multiplataforma (Windows/Linux/macOS).
 
-GitHub: `Johannuel/rust-space-cleaner` (público, MIT). Release `v0.1.0` hecho.
+GitHub: `Johannuel/rust-space-cleaner` (público, MIT). Release `v0.1.0` +
+crate en crates.io (`cargo install rust-space-cleaner`).
 
 ## Estado real (2026-08-06/07)
 
@@ -21,13 +22,15 @@ GitHub: `Johannuel/rust-space-cleaner` (público, MIT). Release `v0.1.0` hecho.
   `CleanSource::with_meta`, `scan::candidate_sources` manejado por el registry.
 - ✅ **41 tests verdes**, clippy `-D warnings`, fmt limpio (CI pasa).
 - ✅ Marketing: README v2, tópicos GitHub, release `v0.1.0` (binaries
-  Linux/macOS/Windows en CI), `PKGBUILD` (AUR), `docs/marketing.md` con copy.
+  Linux/macOS/Windows en CI), **crate en crates.io** (`cargo install
+  rust-space-cleaner` funciona), `PKGBUILD` (AUR, validado), `docs/marketing.md`
+  con copy para X/Bluesky/Reddit/Dev.to/Lobsters.
 - 🔶 Ramas pendientes de integrar a `main`:
   - `feat/progress-tui` (S2): B4 progreso mpsc + B5 badge DUP + T6/T8 tabs/help/detail.
   - `feat/scan-portable` (S3): B2 multiplataforma real + fixtures games/web.
   - `feat/bench` (S4b): benchs Criterion (opcional).
 - ⏳ Pendiente: `clean_batch` + `state.rs` (historial persistente), filtros/sort
-  en TUI, demo GIF, posts Reddit/Dev.to, AUR real (subir PKGBUILD).
+  en TUI, demo GIF, publicar posts, AUR real (subir PKGBUILD, falta SSH).
 
 ## Arquitectura
 
