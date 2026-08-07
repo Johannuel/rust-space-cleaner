@@ -53,6 +53,8 @@ cargo run --release
 | `r` | re-scan |
 | `q` / `Esc` | quit |
 
+When dry-run is **off** and you confirm a cleanup, the removal is written to `~/.local/share/rust-space-cleaner/clean.log` (timestamp, size and path of each entry).
+
 ## Safety
 
 - **Dry-run by default**: the TUI warns that nothing is removed without confirmation.
@@ -94,7 +96,7 @@ tools/
 
 ## Roadmap
 
-- [ ] Live dry-run toggle (`d` key) -- done in `feat/toggle-dryrun`
-- [ ] Real deletion with confirmation + activity log
+- [ ] Live dry-run toggle (`d` key) -- done
+- [x] Real deletion with confirmation + activity log (`clean.log`)
 - [ ] Optional docker prune support
 - [ ] Configurable whitelist/routes via a config file

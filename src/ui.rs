@@ -106,8 +106,16 @@ impl App {
             KeyCode::Char('s') if self.confirm_idx.is_none() && !self.rows.is_empty() => {
                 self.confirm_idx = Some(self.selected);
             }
+            KeyCode::Char('d') if self.confirm_idx.is_none() => {
+                self.dry_run = !self.dry_run;
+            }
             KeyCode::Char('y') if self.confirm_idx.is_some() => {
                 if let Some(idx) = self.confirm_idx.take() {
+                    if self.dry_run {
+                        // Simulación: en dry-run nada se borra.
+                        self.rows[idx].status = ScanStatus::Ok;
+                        return;
+                    }
                     let source = self.rows[idx].clone();
                     match provider.clean(&source) {
                         Ok(()) => self.rows[idx].status = ScanStatus::Ok,
