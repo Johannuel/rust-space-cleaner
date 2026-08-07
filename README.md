@@ -1,92 +1,98 @@
 # 🧹 rust-space-cleaner
 
-Limpiador de caché para usuarios de Arch/Linux con **TUI en la terminal** (Rust + [ratatui](https://github.com/ratatui/ratatui)). Escanea fuentes típicas de bloat (cachés de paquetes, builds de Rust, Docker y logs del sistema), te muestra cuánto ocupa cada una y te deja limpiarlas de forma **segura**: solo borra carpetas de una whitelist explícita y siempre con confirmación.
+[![CI](https://img.shields.io/github/actions/workflow/status/Johannuel/rust-space-cleaner/ci.yml?branch=main&logo=github&style=flat-square)](https://github.com/Johannuel/rust-space-cleaner/actions)
+[![rustc](https://img.shields.io/badge/rust-1.97%2B-orange?logo=rust&style=flat-square)](https://www.rust-lang.org)
+[![MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
+
+A caching cleanup tool for Arch/Linux with a **terminal TUI** (Rust + [ratatui](https://github.com/ratatui/ratatui)). It scans well-known cache sources (package caches, Rust builds, Docker leftovers and system logs), shows you how much each one takes up, and lets you clean them **safely**: it only removes folders from an explicit whitelist and always asks for confirmation.
 
 > [!IMPORTANT]
-> El modo por defecto es **dry-run**: nada se borra sin que lo confirmes. La herramienta solo limpia carpetas tipo "caché" de su whitelist; nunca toca archivos de usuario ni `$HOME`.
+> The default mode is **dry-run**: nothing is deleted unless you confirm it. The tool only cleans "cache"-type folders on its whitelist -- it never touches user files or `$HOME`.
 
-## ¿Para quién?
+## Who is it for?
 
-- **Arch/linuxeros** cuya SSD se llena y ya no quieren adivinar dónde quedaron los gigabytes.
-- Quienes usan **Docker** con imágenes colgadas y **Rust** con `target/` acumulados.
-- Cualquiera aprendiendo Rust que quiera una TUI real y segura para referenciar.
+- **Arch/Linux users** whose SSD keeps filling up and who no longer want to guess where the gigabytes went.
+- People who use **Docker** with dangling images and **Rust** with accumulated `target/` folders.
+- Anyone learning Rust who wants a real, safe TUI as a reference.
 
-## Cómo funciona
+## How it works
 
-1. **Escaneo** (`scan.rs`): detecta fuentes conocidas y mide su tamaño en `bytes` (con threads) sin seguir enlaces simbólicos.
-2. **Vista TUI** (`ui.rs`): lista ordenada de mayor a menor con estado por fila (`scan | ok | error | no encontrado`), spinner mientras escanea y modal de confirmación.
-3. **Limpieza segura** (`clean.rs`): `is_safe_to_clean(path, whitelist)` decide si una ruta puede borrarse (entrada exacta de la whitelist o subdirectorio directo de `~/.cache`). Todo lo demás se rechaza.
+1. **Scan** (`scan.rs`): detects known sources and measures their size in bytes (multithreaded, without following symlinks).
+2. **TUI view** (`ui.rs`): a list sorted by size, showing per-row status (`scan | ok | error | not found`), a spinner while scanning, and a confirmation modal.
+3. **Safe cleanup** (`clean.rs`): `is_safe_to_clean(path, whitelist)` decides whether a folder may be removed (exact whitelist entry or direct subfolder of `~/.cache`). Everything else is rejected.
 
-## Fuentes escaneadas
+## Sources scanned
 
-| Fuente | Ruta | Notas |
+| Source | Path | Notes |
 |---|---|---|
-| Caché de usuario | `~/.cache/*` | solo subdirectorios directos, nunca todo `~/.cache` |
-| Cargo (registry) | `~/.cargo/registry` | |
-| Cargo `target/` | `target/` en `~/Projects` | solo si tiene `.fingerprint` o `build/` (es un *target* real) |
+| User cache | `~/.cache/*` | direct subfolders only, never all of `~/.cache` |
+| Cargo registry | `~/.cargo/registry` | |
+| Cargo `target/` | your project `target` folders | only if it contains `build/` or `.fingerprint/` |
 | Rustup tmp | `~/.rustup/tmp` | |
 | npm / pnpm | `~/.npm/_cacache`, `~/.cache/pnpm` | |
 | pip | `~/.cache/pip` | |
-| Journal (systemd) | `/var/log/journal` | requiere sudo; error de permisos no tumba la app |
-| Docker | imágenes `dangling` | vía `docker images --filter dangling=true` |
+| systemd journal | `/var/log/journal` | needs sudo; permission errors don't crash the app |
+| Docker | dangling images | via `docker images --filter dangling=true` |
 
-## Instalación
+## Install
 
 ```bash
 cargo run --release
 ```
 
-## Uso
+## Usage
 
-| Tecla | Acción |
-|---|---|
-| `↑` / `↓` o `j` / `k` | navegar por las fuentes |
-| `s` | preparar limpieza de la selección |
-| `y` / `n` | confirmar / cancelar en el modal |
-| `r` | reescanear |
-| `q` / `Esc` | salir |
+| Key | Action |
+|-----|--------|
+| `↑` / `↓` or `j` / `k` | navigate between sources |
+| `s` | prepare cleanup for the selected row |
+| `y` / `n` | confirm / cancel in the modal |
+| `d` | toggle dry-run on/off |
+| `r` | re-scan |
+| `q` / `Esc` | quit |
 
-## Seguridad (por diseño)
+## Safety
 
-- **Dry-run por defecto**: la TUI avisa que nada se borra sin confirmar.
-- **Whitelist**: solo se borran rutas explícitas (caché) o subdirectorios directos de `~/.cache`.
-- **Normas duras**: `$HOME`, `/`, una caché completa de un nivel (p. ej. `~/.cache` a secas), prefijos falsos (`~/.cargo_evil`) y rutas fuera de la whitelist siempre son rechazadas y testeadas.
+- **Dry-run by default**: the TUI warns that nothing is removed without confirmation.
+- **Whitelist**: only explicit cache paths (or direct `~/.cache` subfolders) can be removed.
+- **Hard rules**: `$HOME`, `/`, a whole container folder (e.g. `~/.cache` itself), fake prefixes (`~/.cargo_evil`) and paths outside the whitelist are always rejected -- and tested.
 
 ## Tests
 
 ```bash
-cargo test                 # 28 tests (unit + integración + seguridad)
-cargo clippy --all-targets -- -D warnings   # lints estrictas
+cargo test                 # unit + integration + binary tests
+cargo clippy --all-targets -- -D warnings   # strict lints
 cargo fmt --check
 ```
 
-Los tests de integración usan un árbol simulado determinista que genera `tools/gen_fixtures.py` (y que está en `.gitignore`):
+Integration tests use a deterministic fake tree regenerated by `tools/gen_fixtures.py` (gitignored):
 
 ```bash
-python3 tools/gen_fixtures.py --generate   # recrea tests/fixtures
-python3 tools/gen_fixtures.py --clean      # lo elimina
+python3 tools/gen_fixtures.py --generate   # recreate tests/fixtures
+python3 tools/gen_fixtures.py --clean      # remove it
 ```
 
-El CI (`.github/workflows/ci.yml`) corre `fmt`, `clippy` y `test`en cada push/PR.
+CI (`.github/workflows/ci.yml`) runs `fmt`, `clippy` and `test` on every push and PR.
 
-## Estructura
+## Structure
 
 ```
 src/
-  main.rs    -> arranque ratatui + provider real (scan + clean)
+  main.rs    -> ratatui startup + real provider (scan + clean)
   model.rs   -> CleanSource, ScanStatus, human_size
-  scan.rs    -> detección de fuentes + medición de tamaño (threads)
-  clean.rs   -> is_safe_to_clean (whitelist) — TDD
-  ui.rs      -> lista, spinner, modal de confirmación
+  scan.rs    -> source detection + size measuring (threads)
+  clean.rs   -> is_safe_to_clean (whitelist) - TDD
+  ui.rs      -> list, spinner, confirmation modal
 tests/
-  clean_safety.rs   # seguridad de la whitelist
-  scan_extra.rs     # escaneo con fixtures simulados
+  clean_safety.rs   # whitelist safety
+  scan_extra.rs     # scanning against simulated fixtures
 tools/
-  gen_fixtures.py   # genera/limpia el árbol de tests
+  gen_fixtures.py   # generate/clean the test tree
 ```
 
 ## Roadmap
 
-- [ ] Activar/desactivar dry-run en vivo (tecla dedicada).
-- [ ] Soporte de contenedores conviven (docker system prune).
-- [ ] Configudurable (rutas, whitelist) en un archivo.
+- [ ] Live dry-run toggle (`d` key) -- done in `feat/toggle-dryrun`
+- [ ] Real deletion with confirmation + activity log
+- [ ] Optional docker prune support
+- [ ] Configurable whitelist/routes via a config file
