@@ -1,76 +1,76 @@
 use std::ffi::OsString;
 use std::path::{Component, Path};
 
-/// Normaliza una ruta absoluta a sus componentes, resolviendo `.` y `..`.
-/// Devuelve `None` si la ruta no es absoluta o usa un prefijo raro.
-fn componentes_absolutos(path: &Path) -> Option<Vec<OsString>> {
+/// Normalize an absolute path to its components, resolving `.` and `..`.
+/// Returns `None` if the path is not absolute or uses an exotic prefix.
+fn absolute_components(path: &Path) -> Option<Vec<OsString>> {
     if !path.is_absolute() {
         return None;
     }
 
-    let mut partes: Vec<OsString> = Vec::new();
-    for componente in path.components() {
-        match componente {
+    let mut parts: Vec<OsString> = Vec::new();
+    for component in path.components() {
+        match component {
             Component::RootDir | Component::CurDir => {}
             Component::ParentDir => {
-                partes.pop();
+                parts.pop();
             }
-            Component::Normal(nombre) => partes.push(nombre.to_os_string()),
+            Component::Normal(name) => parts.push(name.to_os_string()),
             Component::Prefix(_) => return None,
         }
     }
-    Some(partes)
+    Some(parts)
 }
 
-/// ¿Es `camino` un subdirectorio estricto de `raiz` (raiz + al menos 1 nivel)?
-fn es_prefijo_estricto(raiz: &[OsString], camino: &[OsString]) -> bool {
-    raiz.len() < camino.len() && camino.starts_with(raiz)
+/// Is `candidate` a strict subdirectory of `root` (root + at least 1 level)?
+fn is_strict_prefix(root: &[OsString], candidate: &[OsString]) -> bool {
+    root.len() < candidate.len() && candidate.starts_with(root)
 }
 
-/// ¿Es `entrada` un contenedor contemplado de la whitelist (tiene subentradas)?
-/// Un contenedor se escanea listando sus hijos directos, pero nunca se borra
-/// la carpeta entera (p. ej. `~/.cache`).
-fn es_padre_contemplado(entrada: &[OsString], whitelist: &[&Path]) -> bool {
+/// Is `entry` a whitelist container (i.e. the whitelist has sub-entries)?
+/// A container is scanned by listing its direct children, but the folder
+/// itself is never cleaned as a whole (e.g. `~/.cache`).
+fn is_considered_container(entry: &[OsString], whitelist: &[&Path]) -> bool {
     whitelist
         .iter()
-        .filter_map(|w| componentes_absolutos(w))
-        .any(|otra| es_prefijo_estricto(entrada, &otra))
+        .filter_map(|w| absolute_components(w))
+        .any(|other| is_strict_prefix(entry, &other))
 }
 
-/// Indica si `path` puede borrarse de forma segura según la `whitelist`.
+/// Indicate whether `path` can be safely removed according to the `whitelist`.
 ///
-/// Reglas:
-/// - Se aprueba una entrada exacta de la whitelist.
-/// - Se aprueba un subdirectorio directo (1 nivel) de un contenedor contemplado
-///   de la whitelist (p. ej. `~/.cache/*`).
-/// - Se rechaza el contenedor a secas (`~/.cache`), `$HOME`, la raíz `/`,
-///   prefijos falsos (`~/.cargo_evil`) y rutas fuera de la whitelist.
+/// Rules:
+/// - An exact whitelist entry is approved.
+/// - A direct (1 level) subdirectory of a considered whitelist container is
+///   approved (e.g. `~/.cache/*`).
+/// - The bare container (`~/.cache`), `$HOME`, the root `/`, false prefixes
+///   (`~/.cargo_evil`) and paths outside the whitelist are rejected.
 ///
-/// Las rutas llegan absolutas y con `~` ya expandido.
+/// Paths arrive absolute and with `~` already expanded.
 pub fn is_safe_to_clean(path: &Path, whitelist: &[&Path]) -> bool {
-    let camino = match componentes_absolutos(path) {
+    let candidate = match absolute_components(path) {
         Some(c) if c.len() > 1 => c,
         _ => return false,
     };
 
-    // Un ancestro de una entrada de la whitelist nunca es borrable ($HOME, /).
+    // An ancestor of a whitelist entry is never removable ($HOME, /).
     if whitelist
         .iter()
-        .filter_map(|w| componentes_absolutos(w))
-        .any(|entrada| es_prefijo_estricto(&camino, &entrada))
+        .filter_map(|w| absolute_components(w))
+        .any(|entry| is_strict_prefix(&candidate, &entry))
     {
         return false;
     }
 
     for w in whitelist {
-        let Some(entrada) = componentes_absolutos(w) else {
+        let Some(entry) = absolute_components(w) else {
             continue;
         };
-        if es_padre_contemplado(&entrada, whitelist) {
-            if es_prefijo_estricto(&entrada, &camino) && camino.len() == entrada.len() + 1 {
+        if is_considered_container(&entry, whitelist) {
+            if is_strict_prefix(&entry, &candidate) && candidate.len() == entry.len() + 1 {
                 return true;
             }
-        } else if camino == entrada {
+        } else if candidate == entry {
             return true;
         }
     }
