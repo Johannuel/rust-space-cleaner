@@ -2,6 +2,13 @@
 name = "rust-space-cleaner"
 version = "0.1.0"
 edition = "2024"
+description = "The cache hunter: a safe TUI that scans 24 sources of disk junk (Dev, Games, Web, System, Tools) and reclaims the space with whitelist-only deletion and dry-run by default"
+license = "MIT"
+repository = "https://github.com/Johannuel/rust-space-cleaner"
+readme = "README.md"
+keywords = ["cache", "cleaner", "tui", "ratatui", "disk-space"]
+categories = ["command-line-utilities"]
+exclude = ["tests/fixtures", "assets/", "docs/", "tools/", "blog-rust-space-cleaner.md"]
 
 [dependencies]
 anyhow = "1"
