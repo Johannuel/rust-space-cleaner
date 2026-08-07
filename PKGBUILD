@@ -11,7 +11,7 @@ license=('MIT')
 depends=('gcc-libs')
 makedepends=('cargo' 'rust')
 source=("$url/archive/v$pkgver.tar.gz")
-sha256sums=('SKIP')
+sha256sums=('144b8565e60d3819eb5d071b268c3f30b1c25fbc936c69435c98f6f4ba761259')
 
 build() {
   cd "$srcdir/rust-space-cleaner-$pkgver"
