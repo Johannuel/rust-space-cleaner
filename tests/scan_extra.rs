@@ -7,7 +7,7 @@ mod model;
 use std::path::Path;
 
 use model::{CleanSource, ScanStatus};
-use scan::{candidate_sources, es_target_cargo, scan_all};
+use scan::{candidate_sources, is_cargo_target, scan_all};
 
 const RAIZ: &str = env!("CARGO_MANIFEST_DIR");
 
@@ -55,11 +55,11 @@ fn targets_reales_detectan_solo_cargo_targets() {
         eprintln!("skip: sin python3");
         return;
     }
-    assert!(es_target_cargo(Path::new(&format!(
+    assert!(is_cargo_target(Path::new(&format!(
         "{}/Projects/buena/target",
         home_fixtures()
     ))));
-    assert!(!es_target_cargo(Path::new(&format!(
+    assert!(!is_cargo_target(Path::new(&format!(
         "{}/Projects/falsa/target",
         home_fixtures()
     ))));
@@ -102,7 +102,7 @@ fn journal_sin_permiso_se_reporta_sin_panico() {
     assert_eq!(resultados[0].status, ScanStatus::Error);
     assert_eq!(
         resultados[0].detail.as_deref(),
-        Some("sin permisos (EACCES)")
+        Some("permission denied (EACCES)")
     );
 }
 
@@ -129,6 +129,6 @@ fn docker_dangling_opcional_por_env() {
     let resultados = scan_all(vec![fuente]);
     assert_eq!(resultados[0].status, ScanStatus::Ok);
     let detalle = resultados[0].detail.as_deref().unwrap_or_default();
-    assert!(detalle.contains("imágenes dangling"));
+    assert!(detalle.contains("dangling images"));
     let _ = comando;
 }

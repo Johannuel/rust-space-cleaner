@@ -13,7 +13,7 @@
   <rect width="1200" height="630" fill="url(#bg)"/>
 
   <text x="70" y="96" font-family="'JetBrains Mono','DejaVu Sans Mono',monospace" font-size="44" font-weight="bold" fill="#ffffff">rust-space-cleaner</text>
-  <text x="70" y="128" font-size="24" fill="#cdd6f4" font-family="'DejaVu Sans',sans-serif">Limpiador de cachés con TUI para Arch/Linux — Rust + ratatui</text>
+  <text x="70" y="128" font-size="24" fill="#cdd6f4" font-family="'DejaVu Sans',sans-serif">Cache cleaner with TUI — Rust + ratatui</text>
 
   <rect x="70" y="168" width="1060" height="356" rx="14" fill="#181825" stroke="#313244" stroke-width="2"/>
   <rect x="70" y="168" width="1060" height="34" rx="14" fill="#313244"/>
@@ -22,9 +22,9 @@
   <circle cx="140" cy="185" r="7" fill="#a6e3a1"/>
 
   <g font-family="'JetBrains Mono','DejaVu Sans Mono',monospace" font-size="23">
-    <text x="100" y="245" fill="#7f849c">ESTADO</text>
-    <text x="360" y="245" fill="#7f849c">TAMAÑO</text>
-    <text x="760" y="245" fill="#7f849c">FUENTE</text>
+    <text x="100" y="245" fill="#7f849c">STATUS</text>
+    <text x="360" y="245" fill="#7f849c">SIZE</text>
+    <text x="760" y="245" fill="#7f849c">SOURCE</text>
 
     <text x="100" y="290" fill="#a6e3a1">ok</text>
     <text x="360" y="290" fill="#f9e2af">2.3 GB</text>
@@ -36,7 +36,7 @@
 
     <text x="100" y="370" fill="#a6e3a1">ok</text>
     <text x="360" y="370" fill="#f9e2af">742 MB</text>
-    <text x="760" y="370" fill="#cdd6f4">docker essential dangling</text>
+    <text x="760" y="370" fill="#cdd6f4">docker dangling images</text>
 
     <text x="100" y="410" fill="#f38ba8">error</text>
     <text x="360" y="410" fill="#7b849c">--</text>
@@ -52,11 +52,11 @@
   </g>
 
   <g font-family="'DejaVu Sans',sans-serif" font-size="20">
-    <text x="70" y="572" fill="#89dceb">dry-run por defecto</text>
+    <text x="70" y="572" fill="#89dceb">dry-run by default</text>
     <text x="360" y="572" fill="#cdd6f4">·</text>
-    <text x="384" y="572" fill="#a6e3a1">whitelist explícita</text>
+    <text x="384" y="572" fill="#a6e3a1">explicit whitelist</text>
     <text x="620" y="572" fill="#cdd6f4">·</text>
-    <text x="644" y="572" fill="#f9e2af">confirmación antes de borrar</text>
+    <text x="644" y="572" fill="#f9e2af">confirmation before deleting</text>
   </g>
 
   <text x="70" y="612" font-family="'JetBrains Mono','DejaVu Sans Mono',monospace" font-size="19" fill="#6c7086">github.com/Johannuel/rust-space-cleaner</text>

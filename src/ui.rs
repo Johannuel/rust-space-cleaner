@@ -112,7 +112,7 @@ impl App {
             KeyCode::Char('y') if self.confirm_idx.is_some() => {
                 if let Some(idx) = self.confirm_idx.take() {
                     if self.dry_run {
-                        // Simulación: en dry-run nada se borra.
+                        // Simulation: in dry-run mode nothing is deleted.
                         self.rows[idx].status = ScanStatus::Ok;
                         return;
                     }
@@ -142,9 +142,9 @@ impl App {
         .split(frame.area());
 
         let title = if self.dry_run {
-            "🧹 Limpiador de caché (DRY-RUN) — nada se borra sin confirmar".to_string()
+            "🧹 Cache Cleaner (DRY-RUN) — nothing is deleted without confirmation".to_string()
         } else {
-            "🧹 Limpiador de caché".to_string()
+            "🧹 Cache Cleaner".to_string()
         };
 
         let block = Block::default()
@@ -189,7 +189,7 @@ impl App {
 
         frame.render_widget(List::new(items).block(block), chunks[1]);
 
-        let hints = Paragraph::new("q/Esc salir · r reescanear · s limpiar · ↑/↓ navegar")
+        let hints = Paragraph::new("q/Esc quit · r rescan · s clean · ↑/↓ navigate")
             .style(Style::default().fg(Color::DarkGray));
         frame.render_widget(hints, chunks[2]);
 
@@ -204,19 +204,19 @@ fn draw_confirm_modal(frame: &mut Frame, source: &CleanSource, dry_run: bool) {
     frame.render_widget(Clear, modal_area);
 
     let title = if dry_run {
-        "DRY-RUN — previsualizar"
+        "DRY-RUN — preview"
     } else {
-        "Confirmar limpieza"
+        "Confirm cleanup"
     };
     let text = if dry_run {
         format!(
-            "Se marcará para borrar: '{}'\n({})\n\nDry-run: no se borra nada aún.",
+            "Will be marked for deletion: '{}'\n({})\n\nDry-run: nothing is deleted yet.",
             source.name,
             source.path.display()
         )
     } else {
         format!(
-            "¿Borrar '{}'?\n({})\n\ny = borrar · n = cancelar",
+            "Delete '{}'?\n({})\n\ny = delete · n = cancel",
             source.name,
             source.path.display()
         )
@@ -257,7 +257,7 @@ impl ScanStatus {
             ScanStatus::Scanning => "scan",
             ScanStatus::Ok => "ok",
             ScanStatus::Error => "error",
-            ScanStatus::NotFound => "no encontrado",
+            ScanStatus::NotFound => "not found",
         }
     }
 
@@ -292,7 +292,7 @@ mod tests {
             ScanStatus::Scanning => "scan",
             ScanStatus::Ok => "ok",
             ScanStatus::Error => "error",
-            ScanStatus::NotFound => "no encontrado",
+            ScanStatus::NotFound => "not found",
         }
     }
 }

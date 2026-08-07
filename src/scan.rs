@@ -17,38 +17,38 @@ pub fn home_dir() -> PathBuf {
 }
 
 pub fn candidate_sources(home: &Path) -> Vec<CleanSource> {
-    let mut lista = Vec::new();
-    cache_usuario(home, &mut lista);
-    cargo_global(home, &mut lista);
-    targets_de_proyectos(home, &mut lista);
-    rustup_tmp(home, &mut lista);
-    npm_pnpm(home, &mut lista);
-    pip_cache(home, &mut lista);
-    journal(&mut lista);
-    docker_dangling_fuente(&mut lista);
-    lista
+    let mut sources = Vec::new();
+    user_cache(home, &mut sources);
+    cargo_global(home, &mut sources);
+    project_targets(home, &mut sources);
+    rustup_tmp(home, &mut sources);
+    npm_pnpm(home, &mut sources);
+    pip_cache(home, &mut sources);
+    journal(&mut sources);
+    docker_dangling_source(&mut sources);
+    sources
 }
 
-fn subdirector_como_fuente(
-    lista: &mut Vec<CleanSource>,
+fn push_subdir_source(
+    sources: &mut Vec<CleanSource>,
     id: &'static str,
-    prefijo: &str,
-    ruta: PathBuf,
+    prefix: &str,
+    path: PathBuf,
 ) {
-    if let Some(nombre) = ruta.file_name() {
-        lista.push(CleanSource::new(
+    if let Some(name) = path.file_name() {
+        sources.push(CleanSource::new(
             id,
-            &format!("{prefijo}{}", nombre.to_string_lossy()),
-            ruta,
+            &format!("{prefix}{}", name.to_string_lossy()),
+            path,
         ));
     }
 }
 
-fn cache_usuario(home: &Path, lista: &mut Vec<CleanSource>) {
+fn user_cache(home: &Path, sources: &mut Vec<CleanSource>) {
     #[cfg(target_os = "windows")]
     let base = {
         let app = env::var_os("LOCALAPPDATA").map(PathBuf::from);
-        app.map(|ruta| ruta.join("Temp"))
+        app.map(|path| path.join("Temp"))
     };
     #[cfg(target_os = "linux")]
     let base = Some(home.join(".cache"));
@@ -58,48 +58,48 @@ fn cache_usuario(home: &Path, lista: &mut Vec<CleanSource>) {
     let base: Option<PathBuf> = None;
 
     if let Some(base) = base {
-        for ruta in subdirectorios_directos(&base) {
-            subdirector_como_fuente(lista, "cache_usuario", "cache_usuario/", ruta);
+        for path in direct_subdirs(&base) {
+            push_subdir_source(sources, "user_cache", "user_cache/", path);
         }
     }
 }
 
-fn cargo_global(home: &Path, lista: &mut Vec<CleanSource>) {
+fn cargo_global(home: &Path, sources: &mut Vec<CleanSource>) {
     #[cfg(target_os = "linux")]
-    let ruta = home.join(".cache/cargo");
+    let path = home.join(".cache/cargo");
     #[cfg(not(target_os = "linux"))]
-    let ruta = home.join(".cargo/registry");
+    let path = home.join(".cargo/registry");
 
-    lista.push(CleanSource::new("cargo_target", "cargo (global)", ruta));
+    sources.push(CleanSource::new("cargo_target", "cargo (global)", path));
 }
 
-fn targets_de_proyectos(home: &Path, lista: &mut Vec<CleanSource>) {
-    let raices = [home.join("Projects"), home.join("code"), home.join("dev")];
-    for raiz in raices {
-        for target in encontrar_targets_reales(&raiz) {
-            let nombre = target
+fn project_targets(home: &Path, sources: &mut Vec<CleanSource>) {
+    let roots = [home.join("Projects"), home.join("code"), home.join("dev")];
+    for root in roots {
+        for target in find_real_targets(&root) {
+            let name = target
                 .parent()
                 .and_then(Path::file_name)
                 .map(|n| n.to_string_lossy().into_owned())
                 .unwrap_or_else(|| "target".to_string());
-            lista.push(CleanSource::new(
+            sources.push(CleanSource::new(
                 "cargo_target",
-                &format!("target ({nombre})"),
+                &format!("target ({name})"),
                 target,
             ));
         }
     }
 }
 
-fn rustup_tmp(home: &Path, lista: &mut Vec<CleanSource>) {
-    lista.push(CleanSource::new(
+fn rustup_tmp(home: &Path, sources: &mut Vec<CleanSource>) {
+    sources.push(CleanSource::new(
         "rustup_tmp",
         "rustup/tmp",
         home.join(".rustup/tmp"),
     ));
 }
 
-fn npm_pnpm(home: &Path, lista: &mut Vec<CleanSource>) {
+fn npm_pnpm(home: &Path, sources: &mut Vec<CleanSource>) {
     #[cfg(target_os = "windows")]
     let base = env::var_os("LOCALAPPDATA").map(PathBuf::from);
     #[cfg(not(target_os = "windows"))]
@@ -108,12 +108,12 @@ fn npm_pnpm(home: &Path, lista: &mut Vec<CleanSource>) {
     let Some(base) = base else { return };
     #[cfg(target_os = "windows")]
     {
-        lista.push(CleanSource::new(
+        sources.push(CleanSource::new(
             "npm_cache",
             "npm-cache",
             base.join("npm-cache"),
         ));
-        lista.push(CleanSource::new(
+        sources.push(CleanSource::new(
             "npm_cache",
             "pnpm-cache",
             base.join("pnpm-cache"),
@@ -121,12 +121,12 @@ fn npm_pnpm(home: &Path, lista: &mut Vec<CleanSource>) {
     }
     #[cfg(not(target_os = "windows"))]
     {
-        lista.push(CleanSource::new(
+        sources.push(CleanSource::new(
             "npm_cache",
             "npm/_cacache",
             base.join(".npm/_cacache"),
         ));
-        lista.push(CleanSource::new(
+        sources.push(CleanSource::new(
             "npm_cache",
             "pnpm",
             base.join(".cache/pnpm"),
@@ -134,7 +134,7 @@ fn npm_pnpm(home: &Path, lista: &mut Vec<CleanSource>) {
     }
 }
 
-fn pip_cache(home: &Path, lista: &mut Vec<CleanSource>) {
+fn pip_cache(home: &Path, sources: &mut Vec<CleanSource>) {
     #[cfg(target_os = "windows")]
     let base = env::var_os("LOCALAPPDATA")
         .map(PathBuf::from)
@@ -143,21 +143,21 @@ fn pip_cache(home: &Path, lista: &mut Vec<CleanSource>) {
     let base = Some(home.join(".cache/pip"));
 
     if let Some(base) = base {
-        lista.push(CleanSource::new("pip_cache", "pip", base));
+        sources.push(CleanSource::new("pip_cache", "pip", base));
     }
 }
 
-fn journal(lista: &mut Vec<CleanSource>) {
+fn journal(sources: &mut Vec<CleanSource>) {
     #[cfg(target_os = "linux")]
-    lista.push(CleanSource::new(
+    sources.push(CleanSource::new(
         "journal",
         "journal (systemd)",
         PathBuf::from("/var/log/journal"),
     ));
 }
 
-fn docker_dangling_fuente(lista: &mut Vec<CleanSource>) {
-    lista.push(CleanSource::new(
+fn docker_dangling_source(sources: &mut Vec<CleanSource>) {
+    sources.push(CleanSource::new(
         "docker",
         "docker dangling",
         PathBuf::from("docker-cli"),
@@ -165,124 +165,123 @@ fn docker_dangling_fuente(lista: &mut Vec<CleanSource>) {
 }
 
 pub fn scan_all(sources: Vec<CleanSource>) -> Vec<CleanSource> {
-    std::thread::scope(|ambito| {
-        let hijos: Vec<_> = sources
+    std::thread::scope(|scope| {
+        let handles: Vec<_> = sources
             .into_iter()
-            .map(|fuente| ambito.spawn(move || escanear_fuente(fuente)))
+            .map(|source| scope.spawn(move || scan_source(source)))
             .collect();
-        hijos.into_iter().map(|h| h.join().unwrap()).collect()
+        handles.into_iter().map(|h| h.join().unwrap()).collect()
     })
 }
 
-fn escanear_fuente(fuente: CleanSource) -> CleanSource {
-    if fuente.id == "docker" {
-        return escanear_docker(fuente);
+fn scan_source(source: CleanSource) -> CleanSource {
+    if source.id == "docker" {
+        return scan_docker(source);
     }
-    match medir_dir(&fuente.path) {
+    match measure_dir(&source.path) {
         Ok(size) => {
-            let mut f = fuente;
-            f.size_bytes = size;
-            f.status = ScanStatus::Ok;
-            f
+            let mut scanned = source;
+            scanned.size_bytes = size;
+            scanned.status = ScanStatus::Ok;
+            scanned
         }
-        Err(ScanError::Inexistente) => {
-            let mut f = fuente;
-            f.status = ScanStatus::NotFound;
-            f
+        Err(ScanError::NotFound) => {
+            let mut scanned = source;
+            scanned.status = ScanStatus::NotFound;
+            scanned
         }
-        Err(ScanError::Permiso) => {
-            let mut f = fuente;
-            f.status = ScanStatus::Error;
-            f.detail = Some("sin permisos (EACCES)".to_string());
-            f
+        Err(ScanError::PermissionDenied) => {
+            let mut scanned = source;
+            scanned.status = ScanStatus::Error;
+            scanned.detail = Some("permission denied (EACCES)".to_string());
+            scanned
         }
         Err(_) => {
-            let mut f = fuente;
-            f.status = ScanStatus::Error;
-            f
+            let mut scanned = source;
+            scanned.status = ScanStatus::Error;
+            scanned
         }
     }
 }
 
-fn escanear_docker(fuente: CleanSource) -> CleanSource {
-    let mut fuente = fuente;
+fn scan_docker(mut source: CleanSource) -> CleanSource {
     match docker_dangling() {
-        Ok((size, cantidad)) => {
-            fuente.size_bytes = size;
-            fuente.status = ScanStatus::Ok;
-            fuente.detail = Some(format!("{cantidad} imágenes dangling"));
+        Ok((size, count)) => {
+            source.size_bytes = size;
+            source.status = ScanStatus::Ok;
+            source.detail = Some(format!("{count} dangling images"));
         }
         Err(_) => {
-            fuente.status = ScanStatus::Error;
-            fuente.detail = Some("docker CLI no disponible".to_string());
+            source.status = ScanStatus::Error;
+            source.detail = Some("docker CLI not available".to_string());
         }
     }
-    fuente
+    source
 }
 
 #[derive(Debug)]
 enum ScanError {
-    Inexistente,
-    Permiso,
-    Otro,
+    NotFound,
+    PermissionDenied,
+    Other,
 }
 
 impl From<io::Error> for ScanError {
     fn from(err: io::Error) -> Self {
         match err.kind() {
-            io::ErrorKind::NotFound => Self::Inexistente,
-            io::ErrorKind::PermissionDenied => Self::Permiso,
-            _ => Self::Otro,
+            io::ErrorKind::NotFound => Self::NotFound,
+            io::ErrorKind::PermissionDenied => Self::PermissionDenied,
+            _ => Self::Other,
         }
     }
 }
 
-fn medir_dir(raiz: &Path) -> Result<u64, ScanError> {
-    let meta = fs::symlink_metadata(raiz)?;
+fn measure_dir(root: &Path) -> Result<u64, ScanError> {
+    let meta = fs::symlink_metadata(root)?;
     if meta.file_type().is_file() {
         return Ok(meta.len());
     }
     if !meta.file_type().is_dir() {
-        return Err(ScanError::Otro);
+        return Err(ScanError::Other);
     }
-    let entradas = fs::read_dir(raiz)?;
+    let entries = fs::read_dir(root)?;
     let mut total = 0;
-    for entrada in entradas {
-        let Ok(entrada) = entrada else { continue };
-        let ruta = entrada.path();
-        let Ok(meta) = fs::symlink_metadata(&ruta) else {
+    for entry in entries {
+        let Ok(entry) = entry else { continue };
+        let path = entry.path();
+        let Ok(meta) = fs::symlink_metadata(&path) else {
             continue;
         };
-        let tipo = meta.file_type();
-        if tipo.is_dir() && !tipo.is_symlink() {
-            total += medir_dir(&ruta).unwrap_or(0);
-        } else if tipo.is_file() {
+        let ty = meta.file_type();
+        if ty.is_dir() && !ty.is_symlink() {
+            total += measure_dir(&path).unwrap_or(0);
+        } else if ty.is_file() {
             total += meta.len();
         }
     }
     Ok(total)
 }
 
-fn subdirectorios_directos(ruta: &Path) -> Vec<PathBuf> {
-    let Ok(entradas) = fs::read_dir(ruta) else {
+fn direct_subdirs(path: &Path) -> Vec<PathBuf> {
+    let Ok(entries) = fs::read_dir(path) else {
         return Vec::new();
     };
-    entradas
+    entries
         .filter_map(io::Result::ok)
         .map(|e| e.path())
         .filter(|p| p.is_dir())
         .collect()
 }
 
-pub fn es_target_cargo(path: &Path) -> bool {
+pub fn is_cargo_target(path: &Path) -> bool {
     path.join(".fingerprint").is_dir() || path.join("build").is_dir()
 }
 
-fn encontrar_targets_reales(proyectos: &Path) -> Vec<PathBuf> {
+fn find_real_targets(projects: &Path) -> Vec<PathBuf> {
     let mut targets = Vec::new();
-    for entrada in subdirectorios_directos(proyectos) {
-        let target = entrada.join("target");
-        if es_target_cargo(&target) {
+    for entry in direct_subdirs(projects) {
+        let target = entry.join("target");
+        if is_cargo_target(&target) {
             targets.push(target);
         }
     }
@@ -290,8 +289,8 @@ fn encontrar_targets_reales(proyectos: &Path) -> Vec<PathBuf> {
 }
 
 fn docker_dangling() -> Result<(u64, usize), ScanError> {
-    let comando = env::var("SCAN_TEST_DOCKER_CMD").unwrap_or_else(|_| "docker".to_string());
-    let salida = Command::new(comando)
+    let command = env::var("SCAN_TEST_DOCKER_CMD").unwrap_or_else(|_| "docker".to_string());
+    let output = Command::new(command)
         .args([
             "images",
             "-a",
@@ -301,43 +300,43 @@ fn docker_dangling() -> Result<(u64, usize), ScanError> {
             "{{.Size}}",
         ])
         .output();
-    let salida = match salida {
+    let output = match output {
         Ok(s) if s.status.success() => s,
-        _ => return Err(ScanError::Otro),
+        _ => return Err(ScanError::Other),
     };
-    let texto = String::from_utf8_lossy(&salida.stdout);
+    let text = String::from_utf8_lossy(&output.stdout);
     let mut total = 0;
-    let mut cantidad = 0;
-    for linea in texto.lines() {
-        cantidad += 1;
-        total += parse_tamano_humano(linea).unwrap_or(0);
+    let mut count = 0;
+    for line in text.lines() {
+        count += 1;
+        total += parse_human_size(line).unwrap_or(0);
     }
-    Ok((total, cantidad))
+    Ok((total, count))
 }
 
-fn parse_tamano_humano(cadena: &str) -> Option<u64> {
-    let cadena = cadena.trim();
-    if cadena.is_empty() {
+fn parse_human_size(value: &str) -> Option<u64> {
+    let value = value.trim();
+    if value.is_empty() {
         return None;
     }
-    const SUFIJOS: [(&str, u64); 5] = [
+    const SUFFIXES: [(&str, u64); 5] = [
         ("KiB", 1024),
         ("KB", 1024),
         ("MiB", 1024 * 1024),
         ("MB", 1024 * 1024),
         ("GiB", 1024 * 1024 * 1024),
     ];
-    for (sufijo, factor) in SUFIJOS {
-        if let Some(resto) = cadena.strip_suffix(sufijo) {
-            let numero: f64 = resto.trim().parse().ok()?;
-            return Some((numero * factor as f64) as u64);
+    for (suffix, factor) in SUFFIXES {
+        if let Some(rest) = value.strip_suffix(suffix) {
+            let number: f64 = rest.trim().parse().ok()?;
+            return Some((number * factor as f64) as u64);
         }
     }
-    if let Some(resto) = cadena.strip_suffix('B') {
-        let numero: f64 = resto.trim().parse().ok()?;
-        return Some(numero as u64);
+    if let Some(rest) = value.strip_suffix('B') {
+        let number: f64 = rest.trim().parse().ok()?;
+        return Some(number as u64);
     }
-    cadena.parse::<f64>().ok().map(|n| n as u64)
+    value.parse::<f64>().ok().map(|n| n as u64)
 }
 
 #[cfg(test)]
@@ -347,40 +346,40 @@ mod tests {
     use super::*;
 
     #[test]
-    fn reconoce_target_real() {
+    fn recognizes_real_cargo_target() {
         let dir = env::temp_dir().join("scan_target_test_s3");
         let target = dir.join("target");
         fs::create_dir_all(target.join(".fingerprint")).unwrap();
-        assert!(es_target_cargo(&target));
+        assert!(is_cargo_target(&target));
 
-        let sin_marca = dir.join("sin_meta/target");
-        fs::create_dir_all(&sin_marca).unwrap();
-        assert!(!es_target_cargo(&sin_marca));
+        let unmarked = dir.join("unmarked/target");
+        fs::create_dir_all(&unmarked).unwrap();
+        assert!(!is_cargo_target(&unmarked));
 
         fs::remove_dir_all(&dir).unwrap();
     }
 
     #[test]
-    fn parsea_tamanos_docker() {
-        assert_eq!(parse_tamano_humano("1.5MB"), Some(1_572_864));
-        assert_eq!(parse_tamano_humano("42B"), Some(42));
-        assert_eq!(parse_tamano_humano("1.5 MiB"), Some(1_572_864));
-        assert_eq!(parse_tamano_humano("not-a-size"), None);
+    fn parses_docker_sizes() {
+        assert_eq!(parse_human_size("1.5MB"), Some(1_572_864));
+        assert_eq!(parse_human_size("42B"), Some(42));
+        assert_eq!(parse_human_size("1.5 MiB"), Some(1_572_864));
+        assert_eq!(parse_human_size("not-a-size"), None);
     }
 
     #[test]
-    fn eacces_no_tira_panico() {
+    fn eacces_does_not_panic() {
         let dir = env::temp_dir().join("scan_eacces_test");
-        let bloqueado = dir.join("sin_permiso");
-        fs::create_dir_all(&bloqueado).unwrap();
-        fs::write(bloqueado.join("archivo"), b"datos").unwrap();
-        fs::set_permissions(&bloqueado, fs::Permissions::from_mode(0o000)).unwrap();
+        let blocked = dir.join("no_permission");
+        fs::create_dir_all(&blocked).unwrap();
+        fs::write(blocked.join("file"), b"datos").unwrap();
+        fs::set_permissions(&blocked, fs::Permissions::from_mode(0o000)).unwrap();
 
-        let fuente = CleanSource::new("journal", "fixture", bloqueado.clone());
-        let resultado = scan_all(vec![fuente]);
-        assert_eq!(resultado[0].status, ScanStatus::Error);
+        let source = CleanSource::new("journal", "fixture", blocked.clone());
+        let result = scan_all(vec![source]);
+        assert_eq!(result[0].status, ScanStatus::Error);
 
-        fs::set_permissions(&bloqueado, fs::Permissions::from_mode(0o755)).unwrap();
+        fs::set_permissions(&blocked, fs::Permissions::from_mode(0o755)).unwrap();
         fs::remove_dir_all(&dir).unwrap();
     }
 }

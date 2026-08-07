@@ -1,7 +1,7 @@
 use std::fmt;
 use std::path::PathBuf;
 
-/// Estado de una fuente durante/después del escaneo.
+/// State of a source during/after the scan.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ScanStatus {
     Scanning,
@@ -21,7 +21,7 @@ impl fmt::Display for ScanStatus {
     }
 }
 
-/// Una fuente de limpieneza que el escaneo mide y la UI lista.
+/// A cleanable source that the scan measures and the UI lists.
 #[derive(Debug, Clone)]
 pub struct CleanSource {
     pub id: &'static str,
@@ -45,12 +45,12 @@ impl CleanSource {
     }
 }
 
-/// Tamaño en formato humano: B, KB, MB, GB, TB, EB (base 1024, 1 decimal).
+/// Human-readable size: B, KB, MB, GB, TB, EB (base 1024, 1 decimal).
 pub fn human_size(bytes: u64) -> String {
     if (bytes as u128) < 1024 {
         return format!("{bytes} B");
     }
-    // Potencias: KB=1024^1 ... EB=1024^6 (saltamos PB por brevedad).
+    // Powers: KB=1024^1 ... EB=1024^6 (we skip PB for brevity).
     let units = [(1i32, "KB"), (2, "MB"), (3, "GB"), (4, "TB"), (6, "EB")];
     let b = bytes as f64;
     for &(power, label) in units.iter().rev() {

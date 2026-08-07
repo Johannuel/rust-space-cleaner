@@ -48,11 +48,11 @@ impl SourceProvider for RealProvider {
         let whitelist_refs: Vec<&std::path::Path> = whitelist.iter().map(|p| p.as_path()).collect();
 
         if !clean::is_safe_to_clean(&source.path, &whitelist_refs) {
-            return Err(format!("ruta no permitida: {}", source.path.display()));
+            return Err(format!("path not allowed: {}", source.path.display()));
         }
         let path = source.path.clone();
         std::fs::remove_dir_all(&path)
-            .with_context(|| format!("borrando {}", path.display()))
+            .with_context(|| format!("removing {}", path.display()))
             .map_err(|e| e.to_string())?;
         log_clean(&path, source.size_bytes, &self.home)?;
         Ok(())
