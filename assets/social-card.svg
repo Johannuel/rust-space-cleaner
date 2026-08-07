@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1e1e2e"/>
+      <stop offset="1" stop-color="#11111b"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#89dceb"/>
+      <stop offset="1" stop-color="#a6e3a1"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <text x="70" y="96" font-family="'JetBrains Mono','DejaVu Sans Mono',monospace" font-size="44" font-weight="bold" fill="#ffffff">rust-space-cleaner</text>
+  <text x="70" y="128" font-size="24" fill="#cdd6f4" font-family="'DejaVu Sans',sans-serif">Limpiador de cachés con TUI para Arch/Linux — Rust + ratatui</text>
+
+  <rect x="70" y="168" width="1060" height="356" rx="14" fill="#181825" stroke="#313244" stroke-width="2"/>
+  <rect x="70" y="168" width="1060" height="34" rx="14" fill="#313244"/>
+  <circle cx="96" cy="185" r="7" fill="#f38ba8"/>
+  <circle cx="118" cy="185" r="7" fill="#f9e2af"/>
+  <circle cx="140" cy="185" r="7" fill="#a6e3a1"/>
+
+  <g font-family="'JetBrains Mono','DejaVu Sans Mono',monospace" font-size="23">
+    <text x="100" y="245" fill="#7f849c">ESTADO</text>
+    <text x="360" y="245" fill="#7f849c">TAMAÑO</text>
+    <text x="760" y="245" fill="#7f849c">FUENTE</text>
+
+    <text x="100" y="290" fill="#a6e3a1">ok</text>
+    <text x="360" y="290" fill="#f9e2af">2.3 GB</text>
+    <text x="760" y="290" fill="#cdd6f4">~/.cache</text>
+
+    <text x="100" y="330" fill="#a6e3a1">ok</text>
+    <text x="360" y="330" fill="#f9e2af">1.1 GB</text>
+    <text x="760" y="330" fill="#cdd6f4">target/ (rust project)</text>
+
+    <text x="100" y="370" fill="#a6e3a1">ok</text>
+    <text x="360" y="370" fill="#f9e2af">742 MB</text>
+    <text x="760" y="370" fill="#cdd6f4">docker essential dangling</text>
+
+    <text x="100" y="410" fill="#f38ba8">error</text>
+    <text x="360" y="410" fill="#7b849c">--</text>
+    <text x="760" y="410" fill="#cdd6f4">/var/log/journal (EACCES)</text>
+
+    <text x="100" y="450" fill="#89dceb">scan...</text>
+    <text x="360" y="450" fill="#7b849c">...</text>
+    <text x="760" y="450" fill="#cdd6f4">npm / pip / rustup</text>
+
+    <text x="100" y="490" fill="#89dceb">scan...</text>
+    <text x="360" y="490" fill="#7b849c">...</text>
+    <text x="760" y="490" fill="#cdd6f4">cargo registry</text>
+  </g>
+
+  <g font-family="'DejaVu Sans',sans-serif" font-size="20">
+    <text x="70" y="572" fill="#89dceb">dry-run por defecto</text>
+    <text x="360" y="572" fill="#cdd6f4">·</text>
+    <text x="384" y="572" fill="#a6e3a1">whitelist explícita</text>
+    <text x="620" y="572" fill="#cdd6f4">·</text>
+    <text x="644" y="572" fill="#f9e2af">confirmación antes de borrar</text>
+  </g>
+
+  <text x="70" y="612" font-family="'JetBrains Mono','DejaVu Sans Mono',monospace" font-size="19" fill="#6c7086">github.com/Johannuel/rust-space-cleaner</text>
+</svg>

@@ -4,6 +4,8 @@
 [![rustc](https://img.shields.io/badge/rust-1.97%2B-orange?logo=rust&style=flat-square)](https://www.rust-lang.org)
 [![MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
 
+![rust-space-cleaner preview](assets/social-card.png)
+
 A caching cleanup tool for Arch/Linux with a **terminal TUI** (Rust + [ratatui](https://github.com/ratatui/ratatui)). It scans well-known cache sources (package caches, Rust builds, Docker leftovers and system logs), shows you how much each one takes up, and lets you clean them **safely**: it only removes folders from an explicit whitelist and always asks for confirmation.
 
 > [!IMPORTANT]
