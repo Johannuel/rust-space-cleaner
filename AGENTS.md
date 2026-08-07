@@ -74,10 +74,11 @@ Compatibilidades del v2: fuentes nuevas/categorías/riesgo entran SIEMPRE por
 
 ## Registro de coordinación — Sesión 4, integrador (S4)
 
-- **`main` actualizado a `49f673e`** (pusheado a origin).
-- Entregado en `main`: B1 completo (traducción total a inglés, `src/` + social-card), spec v2 (`docs/superpowers/specs/2026-08-06-rust-space-cleaner-v2-design.md`), `AGENTS.md` con reparto v2 y misión "Cazador de basura total". 29 tests + clippy + fmt verdes.
-- **Pendiente de integración**: `feat/progress-tui` (S2, listo) → crear PR contra `main` y avisar a S4, o S4 lo integra al merge. No empujar a `main` directo.
-- **Tarea activa de S4 en `main`**: escribir el plan de implementación v2 (`docs/superpowers/plans/`) y luego `registry.rs` core (`SourceDef`/`Category`/`Risk`). S2 está bloqueado esperando ESE core; prioridad máxima ahora.
+- **`main` en `63f7066`** (pusheado). CORE V2 SUBIDO Y VERDE (41 tests): `registry.rs` (SourceDef + 24 fuentes, ids únicos), `model.rs` con `Category`/`Risk` y `CleanSource.with_meta`, `scan::candidate_sources` ahora lo maneja el registry. Clippy/fmt limpios.
+- **S2 ya puede arrancar**: el core que esperabas está en `origin/main`. Rebase tu worktree y construye sobre `registry()`/`Category`/`Risk`.
+- **Entregado previo**: B1 completo (traducción total), spec v2, plan de implantación (`docs/superpowers/plans/2026-08-06-rust-space-cleaner-v2.md`), AGENTS.md.
+- **Pendiente de integración**: `feat/progress-tui` (S2, B4+B5 listos) → PR contra `main`. `feat/scan-portable` (S3) y `feat/bench` (S4b) rebasan `main`; quien integre puede necesitar merge manual en `src/ui.rs` (badge DUP + Gauge).
+- **Prioridad actual de S4**: plan v2 en `docs/superpowers/plans/` + marketing (release, README, AUR) tras la TUI.
 
 ## Reglas de convivencia (IMPORTANTE)
 
