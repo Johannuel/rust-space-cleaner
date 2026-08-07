@@ -1,8 +1,18 @@
 # Marketing — rust-space-cleaner (v0.1.0)
 
-Publicamos el release `v0.1.0` + crate en crates.io. Todo el material listo
-para compartir. Gancho común: **"cache hunter: 24 fuentes de basura, borrado
-seguro, dry-run por defecto"**.
+Foco de publicación: **Reddit → X → Bluesky** (Hashnode no dio views; Dev.to
+y Lobsters quedan como opcionales por tiempo). Todo el copy está listo abajo.
+Gancho común: **"cache hunter: 24 fuentes de basura, borrado seguro, dry-run
+por defecto"**.
+
+## Plan de publicación (día 1)
+
+1. **Reddit r/rust** (mañana temprano, 8-10am CET) — el post de más valor.
+2. **X** 1-2h después del de Reddit (misma mañana).
+3. **Bluesky** el mismo día por la tarde.
+4. **r/commandline** 2-3 días después (reposteo con el mismo texto, no spam).
+5. Contestar TODOS los comments las primeras 48h (es lo que más upvotes da).
+6. Si r/rust ignora → re-postear en r/rust con ángulo distinto tras 2 semanas.
 
 ## URL útiles
 
@@ -29,33 +39,7 @@ seguro, dry-run por defecto"**.
 
 ---
 
-## X / Twitter (≤ 280 chars)
-
-```text
-🧹 I built a cache hunter in Rust: it scans 24 kinds of disk junk (dev caches, Steam shaders, Docker leftovers...) and lets you reclaim space safely — whitelist-only, dry-run by default, ratatui TUI. Windows/Linux/macOS.
-
-cargo install rust-space-cleaner
-
-https://github.com/Johannuel/rust-space-cleaner
-#rustlang #ratatui
-```
-
----
-
-## Bluesky (≤ 300 chars)
-
-```text
-🧹 rust-space-cleaner: a safe "cache hunter" TUI in Rust + ratatui. Scans 24 sources of disk junk, shows what each one weighs, and only deletes whitelisted caches after your confirmation (dry-run by default). Win/Linux/macOS.
-
-🚀 cargo install rust-space-cleaner
-
-github.com/Johannuel/rust-space-cleaner
-#rustlang #ratatui #opensource
-```
-
----
-
-## Reddit — r/rust
+## Reddit — r/rust (PRIORIDAD 1, día 1 mañana)
 
 ```markdown
 [P] I built a cache hunter in Rust: scans 24 kinds of disk junk and cleans only the safe stuff
@@ -79,7 +63,32 @@ registry design very welcome 🙏
 
 ---
 
-## Reddit — r/commandline
+## X / Twitter (≤ 280 chars) — día 1, 1-2h tras el post de Reddit
+
+```text
+🧹 I built a cache hunter in Rust: scans 24 types of disk junk safely — whitelist-only, dry-run by default, ratatui TUI. Win/Linux/macOS.
+
+cargo install rust-space-cleaner
+
+https://github.com/Johannuel/rust-space-cleaner
+#rustlang #ratatui
+```
+
+---
+
+## Bluesky (≤ 300 chars; día 1 por la tarde)
+
+```text
+🧹 rust-space-cleaner: safe "cache hunter" TUI in Rust + ratatui. Finds 24 types of disk junk, deletes only whitelisted caches after your confirm (dry-run default). Win/Linux/macOS.
+
+🚀 cargo install rust-space-cleaner
+
+github.com/Johannuel/rust-space-cleaner #rustlang #ratatui
+```
+
+---
+
+## Reddit — r/commandline (2-3 días después del de r/rust)
 
 ```markdown
 [T] rust-space-cleaner — a cache-cleaner TUI for the terminal, now on crates.io
@@ -95,55 +104,39 @@ https://github.com/Johannuel/rust-space-cleaner
 
 ---
 
-## Hacker News («Show HN» — déjalo madurar hasta que haya 1-2 vets)
+## Opcionales (solo si sobra tiempo — bajo prioridad)
 
-```markdown
-Show HN: Cache hunter — Rust TUI that finds and safely cleans 24 sources of
-disk junk
-
-https://github.com/Johannuel/rust-space-cleaner
-```
-
----
-
-## Dev.to
+### Dev.to
 
 ```markdown
 # I made a terminal app that hunts down disk junk ✅ safe by default
 
-A cache hunter for Linux/macOS/Windows, in Rust + ratatui.
-
-**The hook** — caches multiply: package managers, build artifacts, shader
-caches, electron... until your SSD is full and you can't say why.
-
-**What it does** — scans 24 categories, sizes each one, dry-run first; deletes
-only whitelisted folders, logs every removal.
-
-**The interesting part: a declarative registry** — each source is one row in a
-table (id/name/category/risk/paths), so contributing a new one is trivial.
-This is the cleanest Rust I've written.
-
-**What I learned** — cfg!(target_os) for portable paths, threads for measuring
-folders, safety tests for is_safe_to_clean, a CI matrix that ships binaries.
+A cache hunter for Linux/macOS/Windows, in Rust + ratatui. Scans 24 categories,
+sizes each one, dry-run first; deletes only whitelisted folders, logs every
+removal. Declarative registry: each source is one row in a table, so adding
+one is trivial. 41 tests, CI matrix with binaries.
 
 Try it: `cargo install rust-space-cleaner` → run `rust-space-cleaner`.
 Repo: https://github.com/Johannuel/rust-space-cleaner
 ```
 
----
-
-## Lobsters
+### Lobsters
 
 ```markdown
 [T] rust-space-cleaner — cache cleaner TUI in Rust + ratatui
 
-Scans 24 categories of disk junk (dev tool caches, game shader caches, browser
-caches, system logs, docker) and reclaims space safely: whitelist-only
-deletion, dry-run by default, per-source risk badges.
+Scans 24 categories of disk junk and reclaims space safely: whitelist-only
+deletion, dry-run by default. Declarative registry (one row + test), portable
+paths with cfg(target_os), threaded scanning, 41 tests green.
 
-Interesting bits: declarative source registry (one row + test), portable paths
-with cfg(target_os), threaded scanning, safety tests. 41 tests green,
-clippy -D warnings, release binaries for 3 OSes.
+https://github.com/Johannuel/rust-space-cleaner
+```
+
+### Hacker News («Show HN» — solo tras 1-2 reacciones previas)
+
+```markdown
+Show HN: Cache hunter — Rust TUI that finds and safely cleans 24 sources of
+disk junk
 
 https://github.com/Johannuel/rust-space-cleaner
 ```
@@ -174,7 +167,9 @@ Sección sugerida: `Applications → System`.
 4. [x] Publicado en crates.io (`cargo install` funciona)
 5. [ ] PKGBUILD subido a AUR (falta acceso SSH)
 6. [ ] Grabar demo (assets/demo.gif) y ponerlo en README/comment 1 de cada post
-7. [ ] Publicar en X, Bluesky, r/rust, r/commandline, Dev.to, Lobsters
-8. [ ] Star-círculo: pedir a un amigo → con 2-3, solicitar reacciones
+7. [ ] **r/rust** (día 1, mañana) + **X** (misma mañana) + **Bluesky** (tarde)
+8. [ ] **r/commandline** (2-3 días después)
+9. [ ] Star-círculo: pedir a un amigo → con 2-3, solicitar reacciones
+10. [ ] Opcional: Dev.to, Lobsters, Show HN (solo si sobra tiempo)
 
 *El demo se graba desde una terminal real con asciinema → agg → demo.gif.*
