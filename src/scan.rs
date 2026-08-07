@@ -7,75 +7,161 @@ use std::process::Command;
 use crate::model::{CleanSource, ScanStatus};
 
 pub fn home_dir() -> PathBuf {
-    env::var_os("HOME")
-        .map(PathBuf::from)
-        .unwrap_or_else(|| PathBuf::from("/"))
+    #[cfg(target_os = "windows")]
+    let home = env::var_os("USERPROFILE").map(PathBuf::from);
+
+    #[cfg(not(target_os = "windows"))]
+    let home = env::var_os("HOME").map(PathBuf::from);
+
+    home.unwrap_or_else(|| PathBuf::from("."))
 }
 
 pub fn candidate_sources(home: &Path) -> Vec<CleanSource> {
     let mut lista = Vec::new();
+    cache_usuario(home, &mut lista);
+    cargo_global(home, &mut lista);
+    targets_de_proyectos(home, &mut lista);
+    rustup_tmp(home, &mut lista);
+    npm_pnpm(home, &mut lista);
+    pip_cache(home, &mut lista);
+    journal(&mut lista);
+    docker_dangling_fuente(&mut lista);
+    lista
+}
 
-    let cache = home.join(".cache");
-    for ruta in subdirectorios_directos(&cache) {
-        if let Some(nombre) = ruta.file_name() {
+fn subdirector_como_fuente(
+    lista: &mut Vec<CleanSource>,
+    id: &'static str,
+    prefijo: &str,
+    ruta: PathBuf,
+) {
+    if let Some(nombre) = ruta.file_name() {
+        lista.push(CleanSource::new(
+            id,
+            &format!("{prefijo}{}", nombre.to_string_lossy()),
+            ruta,
+        ));
+    }
+}
+
+fn cache_usuario(home: &Path, lista: &mut Vec<CleanSource>) {
+    #[cfg(target_os = "windows")]
+    let base = {
+        let app = env::var_os("LOCALAPPDATA").map(PathBuf::from);
+        app.map(|ruta| ruta.join("Temp"))
+    };
+    #[cfg(target_os = "linux")]
+    let base = Some(home.join(".cache"));
+    #[cfg(target_os = "macos")]
+    let base = Some(home.join("Library/Caches"));
+    #[cfg(not(any(target_os = "windows", target_os = "linux", target_os = "macos")))]
+    let base: Option<PathBuf> = None;
+
+    if let Some(base) = base {
+        for ruta in subdirectorios_directos(&base) {
+            subdirector_como_fuente(lista, "cache_usuario", "cache_usuario/", ruta);
+        }
+    }
+}
+
+fn cargo_global(home: &Path, lista: &mut Vec<CleanSource>) {
+    #[cfg(target_os = "linux")]
+    let ruta = home.join(".cache/cargo");
+    #[cfg(not(target_os = "linux"))]
+    let ruta = home.join(".cargo/registry");
+
+    lista.push(CleanSource::new("cargo_target", "cargo (global)", ruta));
+}
+
+fn targets_de_proyectos(home: &Path, lista: &mut Vec<CleanSource>) {
+    let raices = [home.join("Projects"), home.join("code"), home.join("dev")];
+    for raiz in raices {
+        for target in encontrar_targets_reales(&raiz) {
+            let nombre = target
+                .parent()
+                .and_then(Path::file_name)
+                .map(|n| n.to_string_lossy().into_owned())
+                .unwrap_or_else(|| "target".to_string());
             lista.push(CleanSource::new(
-                "cache_usuario",
-                &format!("cache_usuario/{}", nombre.to_string_lossy()),
-                ruta,
+                "cargo_target",
+                &format!("target ({nombre})"),
+                target,
             ));
         }
     }
+}
 
-    lista.push(CleanSource::new(
-        "cargo_target",
-        "cargo (global)",
-        home.join(".cache/cargo"),
-    ));
-    for target in encontrar_targets_reales(&home.join("Projects")) {
-        let nombre = target
-            .parent()
-            .and_then(Path::file_name)
-            .map(|n| n.to_string_lossy().into_owned())
-            .unwrap_or_else(|| "target".to_string());
-        lista.push(CleanSource::new(
-            "cargo_target",
-            &format!("target ({nombre})"),
-            target,
-        ));
-    }
-
+fn rustup_tmp(home: &Path, lista: &mut Vec<CleanSource>) {
     lista.push(CleanSource::new(
         "rustup_tmp",
         "rustup/tmp",
         home.join(".rustup/tmp"),
     ));
-    lista.push(CleanSource::new(
-        "npm_cache",
-        "npm/_cacache",
-        home.join(".npm/_cacache"),
-    ));
-    lista.push(CleanSource::new(
-        "npm_cache",
-        "pnpm",
-        home.join(".cache/pnpm"),
-    ));
-    lista.push(CleanSource::new(
-        "pip_cache",
-        "pip",
-        home.join(".cache/pip"),
-    ));
+}
+
+fn npm_pnpm(home: &Path, lista: &mut Vec<CleanSource>) {
+    #[cfg(target_os = "windows")]
+    let base = env::var_os("LOCALAPPDATA").map(PathBuf::from);
+    #[cfg(not(target_os = "windows"))]
+    let base = Some(home.to_path_buf());
+
+    let Some(base) = base else { return };
+    #[cfg(target_os = "windows")]
+    {
+        lista.push(CleanSource::new(
+            "npm_cache",
+            "npm-cache",
+            base.join("npm-cache"),
+        ));
+        lista.push(CleanSource::new(
+            "npm_cache",
+            "pnpm-cache",
+            base.join("pnpm-cache"),
+        ));
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        lista.push(CleanSource::new(
+            "npm_cache",
+            "npm/_cacache",
+            base.join(".npm/_cacache"),
+        ));
+        lista.push(CleanSource::new(
+            "npm_cache",
+            "pnpm",
+            base.join(".cache/pnpm"),
+        ));
+    }
+}
+
+fn pip_cache(home: &Path, lista: &mut Vec<CleanSource>) {
+    #[cfg(target_os = "windows")]
+    let base = env::var_os("LOCALAPPDATA")
+        .map(PathBuf::from)
+        .map(|app| app.join("pip/cache"));
+    #[cfg(not(target_os = "windows"))]
+    let base = Some(home.join(".cache/pip"));
+
+    if let Some(base) = base {
+        lista.push(CleanSource::new("pip_cache", "pip", base));
+    }
+}
+
+fn journal(lista: &mut Vec<CleanSource>) {
+    #[cfg(target_os = "linux")]
     lista.push(CleanSource::new(
         "journal",
         "journal (systemd)",
         PathBuf::from("/var/log/journal"),
     ));
+}
+
+fn docker_dangling_fuente(lista: &mut Vec<CleanSource>) {
     lista.push(CleanSource::new(
         "docker",
         "docker dangling",
         PathBuf::from("docker-cli"),
     ));
-
-    lista
 }
 
 pub fn scan_all(sources: Vec<CleanSource>) -> Vec<CleanSource> {

@@ -6,14 +6,14 @@
 
 ![rust-space-cleaner preview](assets/social-card.png)
 
-A caching cleanup tool for Arch/Linux with a **terminal TUI** (Rust + [ratatui](https://github.com/ratatui/ratatui)). It scans well-known cache sources (package caches, Rust builds, Docker leftovers and system logs), shows you how much each one takes up, and lets you clean them **safely**: it only removes folders from an explicit whitelist and always asks for confirmation.
+A caching cleanup tool for **Windows, Linux and macOS** with a **terminal TUI** (Rust + [ratatui](https://github.com/ratatui/ratatui)). It scans well-known cache sources (package caches, Rust builds, Docker leftovers and system logs), shows you how much each one takes up, and lets you clean them **safely**: it only removes folders from an explicit whitelist and always asks for confirmation.
 
 > [!IMPORTANT]
 > The default mode is **dry-run**: nothing is deleted unless you confirm it. The tool only cleans "cache"-type folders on its whitelist -- it never touches user files or `$HOME`.
 
 ## Who is it for?
 
-- **Arch/Linux users** whose SSD keeps filling up and who no longer want to guess where the gigabytes went.
+- **Windows, Linux and macOS users** whose SSD keeps filling up and who no longer want to guess where the gigabytes went.
 - People who use **Docker** with dangling images and **Rust** with accumulated `target/` folders.
 - Anyone learning Rust who wants a real, safe TUI as a reference.
 
@@ -27,13 +27,13 @@ A caching cleanup tool for Arch/Linux with a **terminal TUI** (Rust + [ratatui](
 
 | Source | Path | Notes |
 |---|---|---|
-| User cache | `~/.cache/*` | direct subfolders only, never all of `~/.cache` |
-| Cargo registry | `~/.cargo/registry` | |
+| User cache | `~/.cache` · `%LOCALAPPDATA%\Temp` · `~/Library/Caches` | direct subfolders only (per-OS) |
+| Cargo registry | `~/.cargo/registry` / `~/.cache/cargo` | |
 | Cargo `target/` | your project `target` folders | only if it contains `build/` or `.fingerprint/` |
 | Rustup tmp | `~/.rustup/tmp` | |
 | npm / pnpm | `~/.npm/_cacache`, `~/.cache/pnpm` | |
 | pip | `~/.cache/pip` | |
-| systemd journal | `/var/log/journal` | needs sudo; permission errors don't crash the app |
+| systemd journal | `/var/log/journal` | Linux only; needs sudo, permission errors don't crash the app |
 | Docker | dangling images | via `docker images --filter dangling=true` |
 
 ## Install

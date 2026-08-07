@@ -4,7 +4,7 @@
 
 Tu SSD se llena y no sabes por qué. `du -sh ~/.cache/*` dice la verdad: gigabytes en cachés de paquetes, `target/` de proyectos Rust, imágenes colgadas de Docker y logs de systemd. Borrarlos a mano es lento; borrarlos con `rm -rf` a lo loco es cómo se pierde la carpeta equivocada.
 
-**rust-space-cleaner** es un limpiador de cachés con TUI para Arch/Linux, escrito en **Rust** con **ratatui**. Escanea las fuentes de bloat típicas, te muestra cuánto ocupa cada una ordenada de mayor a menor, y solo borra lo que tú confirmes — y solo carpetas de caché de una whitelist explícita.
+**rust-space-cleaner** es un limpiador de cachés con TUI para Windows, Linux y macOS, escrito en **Rust** con **ratatui**. Escanea las fuentes de bloat típicas, te muestra cuánto ocupa cada una ordenada de mayor a menor, y solo borra lo que tú confirmes — y solo carpetas de caché de una whitelist explícita.
 
 ## Por qué otra herramienta de limpieza
 
@@ -53,7 +53,7 @@ Teclas: `↑↓/jk` navegar, `s` preparar limpieza, `y/n` confirmar, `r` reescan
 
 ## Calidad
 
-- 28 tests: unitarios, de integración con un árbol de fixtures simulado y de seguridad de la whitelist.
+- 29 tests: unitarios, de integración con un árbol de fixtures simulado y de seguridad de la whitelist.
 - `cargo clippy --all-targets -- -D warnings` limpio y CI en GitHub Actions (`fmt` + `clippy` + `test`).
 - Fixtures deterministas generados por `tools/gen_fixtures.py`.
 
@@ -73,8 +73,8 @@ Si el disco se te llena, pruébalo. Si te gusta la idea de una TUI segura en Rus
 
 **Reddit (r/rust, r/archlinux, r/linux):**
 
-> TUI cache-cleaner for Arch/Linux written in Rust with ratatui. Scans ~/.cache, real cargo targets, systemd journal and Docker dangling images; only deletes whitelisted cache dirs after explicit confirmation. Dry-run by default, EACCES handled without panics, 28 tests + CI. Looking for feedback on the safety model and the TUI. https://github.com/Johannuel/rust-space-cleaner
+> TUI cache-cleaner for Windows, Linux and macOS written in Rust with ratatui. Scans OS-native caches, real cargo targets, systemd journal and Docker dangling images; only deletes whitelisted cache dirs after explicit confirmation. Dry-run by default, EACCES handled without panics, 29 tests + CI. Looking for feedback on the safety model and the TUI. https://github.com/Johannuel/rust-space-cleaner
 
 **X/Twitter:**
 
-> Build a safe TUI cache-cleaner for Arch/Linux in Rust + ratatui 🧹 Dry-run by default, whitelist-only deletion, 28 tests, CI green. Scan: ~/.cache, cargo targets, journal, docker dangling. PRs/issues welcome! https://github.com/Johannuel/rust-space-cleaner #rustlang #ratatui #linux
+> Build a safe TUI cache-cleaner for Windows, Linux and macOS in Rust + ratatui 🧹 Dry-run by default, whitelist-only deletion, 29 tests, CI green. Scan: OS caches, cargo targets, journal, docker dangling. PRs/issues welcome! https://github.com/Johannuel/rust-space-cleaner #rustlang #ratatui

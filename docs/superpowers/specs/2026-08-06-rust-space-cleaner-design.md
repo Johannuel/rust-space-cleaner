@@ -83,7 +83,7 @@ src/
 ## Fuera de alcance (YAGNI)
 
 - Navegador de árbol completo del filesystem (estilo ncdu).
-- Soporte multiplataforma (solo Linux/Arch; código portable donde sea barato).
+- Soporte multiplataforma: ya cubierto (Windows, Linux y macOS) — `scan.rs` detecta las rutas de caché por SO (`cfg target_os`); el código sigue siendo portable.
 - Fichero de configuración editable; los defaults van en código por ahora.
 - Sync con la nube o interfaz web.
 
