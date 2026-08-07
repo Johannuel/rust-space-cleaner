@@ -10,7 +10,7 @@ fn main() -> anyhow::Result<()> {
 
     let sources = candidate_sources(&home);
     let mut results = scan_all(sources);
-    results.sort_by(|a, b| b.size_bytes.cmp(&a.size_bytes));
+    results.sort_by_key(|b| std::cmp::Reverse(b.size_bytes));
 
     println!("{:<12} {:>10}  FUENTE", "ESTADO", "TAMAÑO");
     println!("{}", "-".repeat(60));
