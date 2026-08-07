@@ -3,9 +3,8 @@
 > **The cache hunter.** A safe terminal app that shows every gigabyte of junk hiding on your disk and lets you claim it back — Windows, Linux & macOS.
 
 [![CI](https://img.shields.io/github/actions/workflow/status/Johannuel/rust-space-cleaner/ci.yml?branch=main&logo=github&style=flat-square)](https://github.com/Johannuel/rust-space-cleaner/actions)
+[![release](https://img.shields.io/github/v/release/Johannuel/rust-space-cleaner?style=flat-square)](https://github.com/Johannuel/rust-space-cleaner/releases)
 [![rustc](https://img.shields.io/badge/rust-1.97%2B-orange?logo=rust&style=flat-square)](https://www.rust-lang.org)
-[![crates.io](https://img.shields.io/crates/v/rust-space-cleaner?style=flat-square)](https://crates.io/crates/rust-space-cleaner)
-[![AUR](https://img.shields.io/aur/version/rust-space-cleaner?style=flat-square)](https://aur.archlinux.org/packages/rust-space-cleaner)
 [![MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
 
 ![rust-space-cleaner preview](assets/social-card.png)
@@ -20,12 +19,6 @@ SSDs fill up silently. Caches, package registries, build artifacts and docker le
 ## Install
 
 ```bash
-# from source (anywhere, with Rust)
-cargo install rust-space-cleaner
-
-# Arch Linux (AUR)
-yay -S rust-space-cleaner
-
 # or clone & run
 git clone https://github.com/Johannuel/rust-space-cleaner
 cd rust-space-cleaner && cargo run --release
@@ -49,12 +42,9 @@ line to add a new one, and each entry is covered by tests.
 ## The TUI
 
 - **Inventory** view: sources sorted by size, each with a **status**
-  (`scan | ok | error | not found`), live **per-source progress bars**, a
-  **dup badge** when a duplicate exists, and its size at a glance.
-- **Risk metadata** (low / medium / high) on every source so you never delete
-  something by mistake.
-- **Dry-run by default**, `d` to toggle, `?` for the full keymap.
-- **Multi-select batch, filters and history** land in v0.2 (on the roadmap).
+  (`scan | ok | error | not found`) and its size at a glance.
+- **Dry-run by default**, `d` to toggle.
+- Multi-select batch, filters and history are on the roadmap (v0.2).
 
 ### Keymap
 
@@ -62,7 +52,7 @@ line to add a new one, and each entry is covered by tests.
 |-----|--------|
 | `↑` / `↓`, `j` / `k` | navigate |
 | `s` | prepare cleanup for the selected row |
-| `space` | mark for batch cleanup (upcoming) |
+| `Esc` | cancel cleanup |
 | `y` / `n` | confirm / cancel in the modal |
 | `d` | toggle dry-run |
 | `r` | rescan |
@@ -73,11 +63,10 @@ When dry-run is **off** and you confirm a cleanup, the removal is written to
 
 ## Safety
 
-- **Whitelist-driven**: `clean.rs`’s `is_safe_to_clean` only allows exact
+- **Whitelist-driven**: `clean.rs`'s `is_safe_to_clean` only allows exact
   whitelist entries or direct `~/.cache` sub-folders. `$HOME`, `/`, whole
   containers and fake prefixes (`~/.cargo_evil`) are always rejected — and tested.
 - **Dry-run by default** and per-source confirmation.
-- **Badges of risk** so high-effort deletes never happen by accident.
 
 ## Tested, everywhere
 
@@ -97,10 +86,9 @@ src/
   main.rs    -> ratatui startup + real provider
   model.rs   -> CleanSource, ScanStatus, Category, Risk, human_size
   registry.rs-> declarative source registry (the whitelist)
-  scan.rs    -> source detection + size measuring (threads, progress)
-  clean.rs   -> is_safe_to_clean (whitelist) + batch cleanup
-  state.rs   -> persistent history
-  ui.rs      -> inventory, filters, detail, history, help
+  scan.rs    -> source detection + size measuring (threads)
+  clean.rs   -> is_safe_to_clean (whitelist)
+  ui.rs      -> inventory, spinner, confirm modal, dry-run
 tools/
   gen_fixtures.py   # deterministic fake tree for integration tests
 ```
@@ -108,17 +96,18 @@ tools/
 ## Roadmap
 
 - [x] 24-source declarative registry
-- [x] Multi-select batch cleanup
-- [x] History (`state.json`)
 - [x] Multi-platform: Windows, Linux, macOS
 - [x] CI + release binaries
-- [ ] AUR package (upstream)
+- [ ] Progress bars, dup badges, tabs and detail views
+- [ ] Batch cleanup + persistent history
+- [ ] crates.io / AUR packages
 - [ ] Config file (extra per-OS roots)
 
 ## Contributing
 
 PRs welcome. Ideas → [open an issue](https://github.com/Johannuel/rust-space-cleaner/issues).
-`REGISTRY.md` is your friend: you can add the source you care about in a few lines.
+The registry is the place to start: you can add the source you care about in
+a few lines, plus its test.
 
 ---
 
