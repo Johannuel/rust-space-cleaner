@@ -10,6 +10,46 @@ pub enum ScanStatus {
     NotFound,
 }
 
+/// Broad grouping of a cleanable source, drives TUI filters and colors.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Category {
+    Dev,
+    Games,
+    Web,
+    System,
+    Tools,
+}
+
+impl Category {
+    pub fn label(self) -> &'static str {
+        match self {
+            Self::Dev => "dev",
+            Self::Games => "games",
+            Self::Web => "web",
+            Self::System => "system",
+            Self::Tools => "tools",
+        }
+    }
+}
+
+/// How regrettable deleting a source would be. Drives the TUI risk badge.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Risk {
+    Low,
+    Medium,
+    High,
+}
+
+impl Risk {
+    pub fn label(self) -> &'static str {
+        match self {
+            Self::Low => "low",
+            Self::Medium => "medium",
+            Self::High => "high",
+        }
+    }
+}
+
 impl fmt::Display for ScanStatus {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -82,7 +122,23 @@ impl std::fmt::Display for CleanSource {
 
 #[cfg(test)]
 mod tests {
-    use super::human_size;
+    use super::{human_size, Category, Risk};
+
+    #[test]
+    fn category_labels() {
+        assert_eq!(Category::Dev.label(), "dev");
+        assert_eq!(Category::Games.label(), "games");
+        assert_eq!(Category::Web.label(), "web");
+        assert_eq!(Category::System.label(), "system");
+        assert_eq!(Category::Tools.label(), "tools");
+    }
+
+    #[test]
+    fn risk_labels() {
+        assert_eq!(Risk::Low.label(), "low");
+        assert_eq!(Risk::Medium.label(), "medium");
+        assert_eq!(Risk::High.label(), "high");
+    }
 
     #[test]
     fn human_size_formats_units() {
