@@ -34,7 +34,7 @@ flowchart LR
 - [ ] B5 (opcional): dibujar el badge `DUP` (modelo lo pone otro, tú lo pintas).
 
 ### Sesión 3 — Scan multiplataforma
-- [ ] **B2**: asegurar que `scan.rs` (journal `/var/log/journal`, docker) quede portado y compile en Windows/macOS; que el claim multiplataforma del README sea verdad.
+- [x] **B2**: asegurar que `scan.rs` (journal `/var/log/journal`, docker) quede portado y compile en Windows/macOS; que el claim multiplataforma del README sea verdad. (en rama `feat/scan-portable`, CI matrix ubuntu+windows+macos, clippy -D warnings verde en los 3 targets)
 - [ ] B6 (opcional): `benches/scan.rs` (Criterion) + `tools/gen_fixtures.py --big`.
 
 ### Sesión 4 — Integrador (esta sesión)
@@ -65,6 +65,19 @@ borra. Detalles de UI, fuentes y errores: en la spec.
 Compatibilidades del v2: fuentes nuevas/categorías/riesgo entran SIEMPRE por
 `registry.rs` (el núcleo lo larga la sesión 4 primero). Convive con la v1
 (29 tests actuales, en inglés ya).
+
+## Registro de coordinación — Sesión 2 (S2)
+
+- **Estado feat/progress-tui** (worktree `/tmp/rsc-s2`): B4 + B5 listos y en verde (35 tests: 12 bin + 10 clean_safety + 13 scan_extra). Commits `5cc2d99` (B4) y `0bf8dc2` (B5). **Listo para integrar por S4** (no hagas push a main).
+- **v2**: S2 empieza la TUI completa (tabs, historial `h`, detalle `enter`, ayuda `?`, atajos, barra mg). **Bloqueo por dependencias**: espera el core de S4 (`model.rs` con `Category`/`Risk`, `registry.rs`) y `state.rs` de S1 para la vista historial.
+- **Punto caliente para las OL: el mpsc de progreso lo cubre S2** (spec v2 §5). Las ramas `feat/scan-portable` (S3) y `feat/bench` (S4) rebasan mi base; quien integre puede necesitar merge manual en `src/ui.rs` (badge DUP + Gauge).
+
+## Registro de coordinación — Sesión 4, integrador (S4)
+
+- **`main` actualizado a `49f673e`** (pusheado a origin).
+- Entregado en `main`: B1 completo (traducción total a inglés, `src/` + social-card), spec v2 (`docs/superpowers/specs/2026-08-06-rust-space-cleaner-v2-design.md`), `AGENTS.md` con reparto v2 y misión "Cazador de basura total". 29 tests + clippy + fmt verdes.
+- **Pendiente de integración**: `feat/progress-tui` (S2, listo) → crear PR contra `main` y avisar a S4, o S4 lo integra al merge. No empujar a `main` directo.
+- **Tarea activa de S4 en `main`**: escribir el plan de implementación v2 (`docs/superpowers/plans/`) y luego `registry.rs` core (`SourceDef`/`Category`/`Risk`). S2 está bloqueado esperando ESE core; prioridad máxima ahora.
 
 ## Reglas de convivencia (IMPORTANTE)
 
