@@ -1,2 +1,8 @@
 /target
 /tests/fixtures
+
+# internal coordination docs (not public-facing)
+/AGENTS.md
+/CONTEXT.md
+/docs/superpowers/
+/tools/agents-tmux.sh
